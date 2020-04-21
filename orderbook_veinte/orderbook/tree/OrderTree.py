@@ -1,5 +1,4 @@
 import redis as red
-red =red.StrictRedis(host = 'localhost' , port =6379 , db=12)
 
 
 class OrderTree() : 
