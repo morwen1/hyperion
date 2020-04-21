@@ -3,7 +3,10 @@ from django.db import models
 
 
 #MODELS
-class Orders (models.Model):
+from .Abstract_order import AbOrderbook
+
+
+class Orders (models.Model , AbOrderbook):
     """
         Modelo de las ordernes 
         las ordenes pueden ser tipo ask o bid
