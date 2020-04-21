@@ -4,7 +4,7 @@ from django.db import models
 from .Abstract_order import AbOrderbook
 
 
-class Trades ( AbOrderbook):
+class Trades (AbOrderbook):
     """
      trades in the order book 
     traders id's provisionales
@@ -12,12 +12,12 @@ class Trades ( AbOrderbook):
     qty   = models.FloatField()
     price = models.FloatField()
     timestamp = models.TimeField()
-    p1_traderId  = models.CharField()
-    p1_side = models.CharField()
-    p1_orderId = models.CharField()
-    p2_traderId  = models.CharField()
-    p2_side  = models.CharField()
-    p2_orderId = models.CharField()
+    p1_traderId  = models.CharField(max_length =255)
+    p1_side = models.CharField(max_length =255)
+    p1_orderId = models.CharField(max_length =255)
+    p2_traderId  = models.CharField(max_length =255)
+    p2_side  = models.CharField(max_length =255)
+    p2_orderId = models.CharField(max_length =255)
 
     def get_traders(self) : 
         return f"{p1_traderId} , {p2_traderId}"
