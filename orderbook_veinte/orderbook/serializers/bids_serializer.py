@@ -39,4 +39,17 @@ class BidsSerializers(serializers.ModelSerializer):
 
 
         return order   
-  
+
+
+class UpdateBidSerializer(serializers.ModelSerializer):
+    class Meta : 
+        model = Orders
+        fields = ('qty', )   
+    
+    def update(self , instance , validated_data ):
+        ob = initializeTree()
+        if ob.bids.orderExist(instance.orderId)== True:
+            ob.bids.updateOrderQuatity(instance.orderId ,validated_data['qty'])
+    
+        return super(UpdateBidSerializer , self).update(instance , validated_data)
+        

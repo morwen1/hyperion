@@ -32,7 +32,7 @@ class OrderTree():
 
     def orderExist(self, orderId):
 
-        return self.red.exist(self.KEY_TEMPLATE_QUOTE) #verifica si existe la orden 
+        return self.red.exists(self.KEY_TEMPLATE_QUOTE) #verifica si existe la orden 
 
 
     def insertOrder(self, order):
