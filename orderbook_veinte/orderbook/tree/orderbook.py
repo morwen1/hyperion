@@ -170,7 +170,7 @@ class OrderBook():
 
     def getBestAsk(self):
         return self.asks.maxPrice()
-        
+    
     def getWorstAsk(self):
         return self.asks.minPrice()
 

@@ -48,8 +48,9 @@ class OrderTree():
         if not self.red.exists(self.KEY_TEMPLATE_PRICE_QUOTES % price):
             self.red.zadd(self.KEY_PRICE_TREE, mapping ) #agrega el precio al zset de los precios
 
-        self.red.hmset(self.KEY_TEMPLATE_QUOTE % order.orderId, order.__dict__)
-        self.red.rpush(self.KEY_TEMPLATE_PRICE_QUOTES % price, order.orderId)
+        
+        self.red.hmset(self.KEY_TEMPLATE_QUOTE % order.orderId, order.__dict__)#agrega al set a la orden
+        self.red.rpush(self.KEY_TEMPLATE_PRICE_QUOTES % price, order.orderId) #agrega al set
         print (self.KEY_PRICE_TREE  , order.orderId, self.KEY_TEMPLATE_QUOTE , self.KEY_TEMPLATE_PRICE_QUOTES)
 
 

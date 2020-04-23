@@ -20,15 +20,23 @@ class BidsSerializers(serializers.ModelSerializer):
         ob = initializeTree()
         bid = Bid(**validated_data  )
         ob.processOrder(bid)
-        
-        order = Orders.objects.create(
-            Bid = True , 
-            Ask = False,
-            **validated_data
-        )
-        order.save()
-        import pdb; pdb.set_trace()
+        existence_order =Orders.objects.filter(**validated_data , Bid=True).exists()
 
-        return order        
-    
-   
+        if  existence_order == False:
+            order = Orders.objects.create(
+                Bid = True , 
+
+                Ask = False,
+                **validated_data
+            )
+            if order.orderId != bid.orderId:
+                order.orderId = bid.orderId
+
+            order.save()
+        else: 
+            order = Orders.objects.get(**validated_data , Bid=True)
+            raise serializers.ValidationError(f'order {order.orderId} exists :c ' )
+
+
+        return order   
+  
