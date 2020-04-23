@@ -14,4 +14,6 @@ class AbOrderbook (models.Model):
     created_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(auto_now=False , null=True)
     uptadeted_at = models.DateTimeField(auto_now=False , null=True)
+    class Meta:
+        abstract =True
     
