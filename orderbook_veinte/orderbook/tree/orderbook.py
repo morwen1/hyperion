@@ -33,19 +33,31 @@ class Order():
                 tradedQty = qtyToTrade
                 # Amend book order
                 newBookQty = order.qty - qtyToTrade
-
-                tree.updateOrderQuantity(order, orderId)
+                tree.updateOrderQuatity(order.orderId, newBookQty)
+                # Incoming done with
+                qtyToTrade = 0
+            elif qtyToTrade == order.qty:
+                tradedQty = qtyToTrade
+                # hit bid or lift ask
+                tree.removeOrderById(order.orderId)
+                # Incoming done with
+                qtyToTrade = 0
+            else:
+                tradedQty = order.qty
+                # hit bid or lift ask
+                tree.removeOrderById(order.orderId)
+                # continue processing volume at this price
                 qtyToTrade -= tradedQty
 
-            transactionRecord = {'timestamp': book.getTimestamp(), 'price': order.price, 'qty': tradeQty}
+            transactionRecord = {'timestamp': book.getTimestamp(), 'price': order.price, 'qty': tradedQty}
             if tree.side == 'bid':
                 transactionRecord['party1'] = [order.traderId, 'bid', order.orderId]
-                transactionRecord['party2'] = [self.traderId, bid, None]
+                transactionRecord['party2'] = [self.traderId, 'ask', None]
             else:
                 transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
                 transactionRecord['party2'] = [self.traderId, 'bid', None]
             trades.append(transactionRecord)
-            return qtyToTrade, trades
+        return qtyToTrade, trades
 
  
 class Bid(Order):
@@ -58,10 +70,11 @@ class Bid(Order):
         orderInBook = None
         qtyToTrade = self.qty
         while (asks and self.price >= asks.minPrice() and qtyToTrade > 0):
-            bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'])
-                             for x in ask.minPricelist()]
+            bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId']) for x in asks.minPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade)
             trades += newTrades
+       
+           
         if qtyToTrade > 0:
             self.orderId = book.getNextQuoteId()
             self.qty = qtyToTrade
@@ -69,15 +82,15 @@ class Bid(Order):
             orderInBook = self
         return trades, orderInBook
 
-    def maketOrder(self,  book, bids, asks):
+
+    def marketOrder(self, book, bids, asks):
         trades = []
         qtyToTrade = self.qty
-        while qtyToTrade > 0 and self.tasks:
-            bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'])
-                             for x in ask.minPriceList()]
+        while qtyToTrade > 0 and self.asks:
+            bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId']) for x in asks.minPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade)
-            trades = + trades
-            return trades
+            trades += newTrades
+        return trades
 
 
 class Ask(Order):
@@ -93,12 +106,15 @@ class Ask(Order):
             bestPriceBids = [Bid(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'])
                              for x in bids.maxPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book,  bids, bestPriceBids, qtyToTrade)
+            
             trades += newTrades
 
         if qtyToTrade > 0:
             self.orderId = book.getNextQuoteId()
             self.qty = qtyToTrade
             asks.insertOrder(self)
+            orderInBook = self
+
 
         return trades, orderInBook
 
@@ -108,7 +124,7 @@ class Ask(Order):
         while qtyToTrade > 0 and self.bids:
             bestPriceBids = [Bid(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'])
                              for x in bids.maxPriceList()]
-            qtyToTrade, newTrades, self.processPriceLevel(book, bids, bestPriceBids, qtyToTrade,)
+            qtyToTrade, newTrades = self.processPriceLevel(book, bids, bestPriceBids, qtyToTrade,)
             trades += newTrades
 
         return trades
@@ -149,6 +165,7 @@ class OrderBook():
         order.timestamp = self.getTimestamp()
 
         trades, orderInBook = order.limitOrder(self, self.bids, self.asks)
+
         return trades, orderInBook
 
     def cancelOrder(self, side, orderId):

@@ -6,23 +6,23 @@ from rest_framework.permissions import AllowAny
 from orderbook.models.Order import Orders
 
 #serializers
-from orderbook.serializers import BidsSerializers ,UpdateBidSerializer
+from orderbook.serializers import AsksSerializers ,UpdateAskSerializer
 
-class CreateBids( 
-    GenericViewSet,
-    mixins.CreateModelMixin, 
-    mixins.ListModelMixin,
+class CreateAsks( 
+    GenericViewSet,  
+    mixins.CreateModelMixin , 
+    mixins.ListModelMixin , 
     mixins.UpdateModelMixin):
 
             
 
-    queryset = Orders.objects.filter(Bid=True)
+    queryset = Orders.objects.filter(Ask=True)
     permission_classes = [AllowAny , ]
 
     def get_serializer_class(self):
         
         if self.action == 'list' or  self.action == 'create':
-            serializer = BidsSerializers
+            serializer = AsksSerializers
         elif self.action == 'update' : 
-            serializer = UpdateBidSerializer
+            serializer = UpdateAskSerializer
         return serializer

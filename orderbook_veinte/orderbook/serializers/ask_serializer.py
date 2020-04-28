@@ -7,49 +7,49 @@ from rest_framework import serializers
 from orderbook.models import Orders
 #Orerbook
 from orderbook_veinte.orderbook.tree import initializeTree
-from orderbook_veinte.orderbook.tree import Bid
+from orderbook_veinte.orderbook.tree import Ask
 
 
 
-class BidsSerializers(serializers.ModelSerializer):
+class AsksSerializers(serializers.ModelSerializer):
     class Meta : 
         model = Orders
         fields = ('traderId','timestamp' , 'qty' , 'price')
     def create(self , validated_data):
 
         ob = initializeTree()
-        bid = Bid(**validated_data  )
-        ob.processOrder(bid)
-        existence_order =Orders.objects.filter(**validated_data , Bid=True).exists()
+        ask = Ask(**validated_data  )
+        ob.processOrder(ask)
+        existence_order =Orders.objects.filter(**validated_data , Ask=True).exists()
 
         if  existence_order == False:
             order = Orders.objects.create(
-                Bid = True , 
+                Ask = True , 
 
-                Ask = False,
+                Bid = False,
                 **validated_data
             )
-            #if order.orderId != bid.orderId:
-            #    order.orderId = bid.orderId
+            if order.orderId != ask.orderId:
+                order.orderId = ask.orderId
 
             order.save()
         else: 
-            order = Orders.objects.get(**validated_data , Bid=True)
+            order = Orders.objects.get(**validated_data , Ask=True)
             raise serializers.ValidationError(f'order {order.orderId} exists :c ' )
 
 
         return order   
 
 
-class UpdateBidSerializer(serializers.ModelSerializer):
+class UpdateAskSerializer(serializers.ModelSerializer):
     class Meta : 
         model = Orders
         fields = ('qty', )   
     
     def update(self , instance , validated_data ):
         ob = initializeTree()
-        if ob.bids.orderExist(instance.orderId)== True:
-            ob.bids.updateOrderQuatity(instance.orderId ,validated_data['qty'])
+        if ob.asks.orderExist(instance.orderId)== True:
+            ob.asks.updateOrderQuatity(instance.orderId ,validated_data['qty'])
     
-        return super(UpdateBidSerializer , self).update(instance , validated_data)
+        return super(UpdateAskSerializer , self).update(instance , validated_data)
         

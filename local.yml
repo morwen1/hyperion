@@ -13,6 +13,7 @@ services:
     depends_on:
       - postgres
       - mailhog
+      - redis
     volumes:
       - .:/app
     env_file:
@@ -42,6 +43,8 @@ services:
 
   redis:
     image: redis:5.0
+    ports : 
+      - "6379:6379"
 
   celeryworker:
     <<: *django
