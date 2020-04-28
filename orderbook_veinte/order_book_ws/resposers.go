@@ -1,14 +1,12 @@
 package main
 
-import "time"
-
 type Order struct {
-	OrderId   int       `json:"orderId"`
-	Qty       int       `json:"qty"`
-	TraderId  string    `json:"traderId"`
-	Price     float64   `json:"price"`
-	Timestamp time.Time `json:"timestamp"`
-	Side      string    `json:"side"`
+	OrderId   string `json:"orderId"`
+	Qty       string `json:"qty"`
+	TraderId  string `json:"traderId"`
+	Price     string `json:"price"`
+	Timestamp string `json:"timestamp"`
+	Side      string `json:"side"`
 }
 
 type Responses struct {
