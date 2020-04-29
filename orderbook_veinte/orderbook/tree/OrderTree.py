@@ -62,11 +62,14 @@ class OrderTree():
         order_dep = {}
         for i in order.keys() : 
             order_dep[i.decode()] = order[i].decode()
-        order = order_dep 
-        self.red.lrem(self.KEY_TEMPLATE_PRICE_QUOTES % order['price'], 0, orderId)
+        
 
-        if not self.red.exists(self.KEY_TEMPLATE_PRICE_QUOTES % order['price']):
-            self.red.zrem(self.KEY_PRICE_TREE, order['price'])
+
+        print(order_dep)
+        self.red.lrem(self.KEY_TEMPLATE_PRICE_QUOTES % order_dep['price'], 0, orderId)
+
+        if not self.red.exists(self.KEY_TEMPLATE_PRICE_QUOTES % order_dep['price']):
+            self.red.zrem(self.KEY_PRICE_TREE, order_dep['price'])
 
         self.red.delete(self.KEY_TEMPLATE_QUOTE % orderId)
 

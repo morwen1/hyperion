@@ -20,7 +20,7 @@ class AsksSerializers(serializers.ModelSerializer):
         ob = initializeTree()
         ask = Ask(**validated_data  )
         ob.processOrder(ask)
-        existence_order =Orders.objects.filter(**validated_data , Ask=True).exists()
+        existence_order =False #Orders.objects.filter(**validated_data , Ask=True).exists()
 
         if  existence_order == False:
             order = Orders.objects.create(
@@ -29,8 +29,6 @@ class AsksSerializers(serializers.ModelSerializer):
                 Bid = False,
                 **validated_data
             )
-            if order.orderId != ask.orderId:
-                order.orderId = ask.orderId
 
             order.save()
         else: 

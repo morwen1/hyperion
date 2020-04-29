@@ -37,6 +37,7 @@ class Order():
                 # Incoming done with
                 qtyToTrade = 0
             elif qtyToTrade == order.qty:
+
                 tradedQty = qtyToTrade
                 # hit bid or lift ask
                 tree.removeOrderById(order.orderId)
@@ -57,6 +58,7 @@ class Order():
                 transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
                 transactionRecord['party2'] = [self.traderId, 'bid', None]
             trades.append(transactionRecord)
+            print(trades)
         return qtyToTrade, trades
 
  

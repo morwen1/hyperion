@@ -20,7 +20,7 @@ class BidsSerializers(serializers.ModelSerializer):
         ob = initializeTree()
         bid = Bid(**validated_data  )
         ob.processOrder(bid)
-        existence_order =Orders.objects.filter(**validated_data , Bid=True).exists()
+        existence_order =False#Orders.objects.filter(**validated_data , Bid=True).exists()
 
         if  existence_order == False:
             order = Orders.objects.create(

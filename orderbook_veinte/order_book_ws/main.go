@@ -1,10 +1,25 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"time"
+)
 
 func main() {
-	c := GetRedisClient()
-	x := c.GetQuotes(true, 10)
-	fmt.Println(x)
+	r := Router()
+	server := Server(r, "0.0.0.0:8001")
+	go server.ListenAndServe()
+	log.Println("running server....")
+	go HandleMessage()
+	logsCmd := "listening"
+	for {
+		log.Println(logsCmd)
+		time.Sleep(3 * time.Minute)
+		if logsCmd == "listening......" {
+			logsCmd = "listening"
+		} else {
+			logsCmd = logsCmd + "."
+		}
 
+	}
 }
