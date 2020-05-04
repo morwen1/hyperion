@@ -75,7 +75,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "orderbook_veinte.users.apps.UsersConfig",
-    "orderbook",
+    "orderbook_veinte.orderbook.apps.OrderBookConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

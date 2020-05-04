@@ -18,6 +18,9 @@ class Order():
         self.traderId = traderId
         self.timestamp = timestamp
         self.orderId = orderId
+    
+    def removeSelfOrder (self):
+        tree.removeOrderById(self.orderId)
 
     def processPriceLevel(self, book, tree, orderlist, qtyToTrade):
         """
@@ -35,13 +38,16 @@ class Order():
                 newBookQty = order.qty - qtyToTrade
                 tree.updateOrderQuatity(order.orderId, newBookQty)
                 # Incoming done with
+                break
                 qtyToTrade = 0
             elif qtyToTrade == order.qty:
 
                 tradedQty = qtyToTrade
                 # hit bid or lift ask
                 tree.removeOrderById(order.orderId)
+                import pdb; pdb.set_trace()
                 # Incoming done with
+                break
                 qtyToTrade = 0
             else:
                 tradedQty = order.qty
@@ -71,11 +77,11 @@ class Bid(Order):
         trades = []
         orderInBook = None
         qtyToTrade = self.qty
+
         while (asks and self.price >= asks.minPrice() and qtyToTrade > 0):
             bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId']) for x in asks.minPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade)
             trades += newTrades
-       
            
         if qtyToTrade > 0:
             self.orderId = book.getNextQuoteId()

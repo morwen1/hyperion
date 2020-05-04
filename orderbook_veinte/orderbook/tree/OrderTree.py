@@ -65,7 +65,6 @@ class OrderTree():
         
 
 
-        print(order_dep)
         self.red.lrem(self.KEY_TEMPLATE_PRICE_QUOTES % order_dep['price'], 0, orderId)
 
         if not self.red.exists(self.KEY_TEMPLATE_PRICE_QUOTES % order_dep['price']):

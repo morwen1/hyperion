@@ -4,7 +4,7 @@
 from rest_framework import serializers
 
 #MODELS 
-from orderbook.models import Orders
+from orderbook_veinte.orderbook.models import Orders
 #Orerbook
 from orderbook_veinte.orderbook.tree import initializeTree
 from orderbook_veinte.orderbook.tree import Ask

@@ -3,10 +3,10 @@ from rest_framework.generics import mixins
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import AllowAny
 #models 
-from orderbook.models.Order import Orders
+from orderbook_veinte.orderbook.models.Order import Orders
 
 #serializers
-from orderbook.serializers import BidsSerializers ,UpdateBidSerializer
+from orderbook_veinte.orderbook.serializers import BidsSerializers ,UpdateBidSerializer
 
 class CreateBids( 
     GenericViewSet,

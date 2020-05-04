@@ -23,6 +23,23 @@ services:
       - "8000:8000"
     command: /start
 
+  
+  
+  golang:
+    build : 
+      context: . 
+      dockerfile: ./compose/local/golang/Dockerfile
+    image: orderbook_veinte_local_golang
+    depends_on:
+      - django
+      - redis 
+    volumes : 
+      - .:/app
+    ports:
+      - "8001:8001"
+    command: ./app
+
+
   postgres:
     build:
       context: .

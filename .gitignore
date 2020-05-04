@@ -277,3 +277,4 @@ orderbook_veinte/media/
 .env
 .envs/*
 !.envs/.local/
+*.sh
