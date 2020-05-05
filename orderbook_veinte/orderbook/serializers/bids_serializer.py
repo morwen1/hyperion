@@ -9,6 +9,8 @@ from orderbook_veinte.orderbook.models import Orders
 #Orerbook
 from orderbook_veinte.orderbook.tree import initializeTree
 from orderbook_veinte.orderbook.tree import Bid
+from orderbook_veinte.orderbook import tasks
+
 
 
 
@@ -20,7 +22,8 @@ class BidsSerializers(serializers.ModelSerializer):
 
         ob = initializeTree()
         bid = Bid(**validated_data  )
-        ob.processOrder(bid)
+        tasks.AsincronicOrderProces(ob,bid)
+
         existence_order =False#Orders.objects.filter(**validated_data , Bid=True).exists()
 
         if  existence_order == False:

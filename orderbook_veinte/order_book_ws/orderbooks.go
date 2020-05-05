@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -27,21 +26,26 @@ func BtcOrderBook(w http.ResponseWriter, r *http.Request) {
 		log.Panic("bad request")
 	}
 	wsClient = ws
-	counter := client.Get("counter:BTC-XLT-orderId").Val()
+	counter := len(client.Keys("quote*").Val())
 	for {
 		var msg Responses
 
-		c := client.Get("counter:BTC-XLT-orderId").Val()
+		c := len(client.Keys("quote*").Val())
 		if c != counter {
 
-			bids := client.GetQuotes(true, 10, "bid")
-			asks := client.GetQuotes(true, 10, "ask")
+			bids := client.GetQuotes(true, 100, "bid")
+			asks := client.GetQuotes(true, 100, "ask")
 			msg.Asks = asks
 			msg.Bids = bids
-			message <- msg
-			counter = client.Get("counter:BTC-XLT-orderId").Val()
-			time.Sleep(10 * time.Millisecond)
+			msg.MinPriceAsk = client.GetPrices(false, true, "ask")
+			msg.MaxPriceAsk = client.GetPrices(true, false, "ask")
+			msg.MinPriceBid = client.GetPrices(false, true, "bid")
+			msg.MaxPriceBid = client.GetPrices(true, false, "bid")
+			msg.LastTransaction = client.GetLastTransaction("BTC")
 
+			message <- msg
+			counter = len(client.Keys("quote*").Val())
+			log.Println("change message...  ", counter)
 		}
 
 	}

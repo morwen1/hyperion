@@ -80,6 +80,7 @@ services:
       - redis
       - postgres
       - mailhog
+      - django
     ports: []
     command: /start-celerybeat
 

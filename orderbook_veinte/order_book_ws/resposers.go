@@ -9,9 +9,16 @@ type Order struct {
 	Side      string `json:"side"`
 }
 
+type Transaction struct {
+	Price string `json:"price"`
+	Qty   string `json:"qty"`
+}
 type Responses struct {
-	MaxPrice float64 `json:"maxPrice"`
-	MinPrice float64 `json:"minPrice"`
-	Bids     []Order `json:"bids"`
-	Asks     []Order `json:"asks"`
+	LastTransaction Transaction `json:"lastTransaction"`
+	MaxPriceBid     string      `json:"maxPriceBid"`
+	MinPriceBid     string      `json:"minPriceBid"`
+	MaxPriceAsk     string      `json:"maxPriceAsk"`
+	MinPriceAsk     string      `json:"minPriceAsk"`
+	Bids            []Order     `json:"bids"`
+	Asks            []Order     `json:"asks"`
 }

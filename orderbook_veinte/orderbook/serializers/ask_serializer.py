@@ -8,7 +8,7 @@ from orderbook_veinte.orderbook.models import Orders
 #Orerbook
 from orderbook_veinte.orderbook.tree import initializeTree
 from orderbook_veinte.orderbook.tree import Ask
-
+from orderbook_veinte.orderbook import tasks
 
 
 class AsksSerializers(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class AsksSerializers(serializers.ModelSerializer):
 
         ob = initializeTree()
         ask = Ask(**validated_data  )
-        ob.processOrder(ask)
+        tasks.AsincronicOrderProces(ob,ask)
         existence_order =False #Orders.objects.filter(**validated_data , Ask=True).exists()
 
         if  existence_order == False:
