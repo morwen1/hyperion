@@ -37,10 +37,10 @@ func BtcOrderBook(w http.ResponseWriter, r *http.Request) {
 			asks := client.GetQuotes(true, 100, "ask")
 			msg.Asks = asks
 			msg.Bids = bids
-			msg.MinPriceAsk = client.GetPrices(false, true, "ask")
-			msg.MaxPriceAsk = client.GetPrices(true, false, "ask")
-			msg.MinPriceBid = client.GetPrices(false, true, "bid")
-			msg.MaxPriceBid = client.GetPrices(true, false, "bid")
+			msg.MinPriceAsk = client.GetPrices("asc", "ask")
+			msg.MinPriceBid = client.GetPrices("asc", "bid")
+			msg.MaxPriceAsk = client.GetPrices("desc", "ask")
+			msg.MaxPriceBid = client.GetPrices("desc", "bid")
 			msg.LastTransaction = client.GetLastTransaction("BTC")
 
 			message <- msg

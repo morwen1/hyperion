@@ -51,20 +51,20 @@ func (red *RedisClient) GetQuotes(reverse bool, depth int, side string) []Order 
 	return orders
 }
 
-func (red *RedisClient) GetPrices(max bool, min bool, side string) string {
+func (red *RedisClient) GetPrices(orientation string, side string) string {
 	price := make([]string, 0, 1)
 	key := KEY_PRICE_TREE + side
 	if side == "bid" {
-		if (max == true) && (min == false) {
+		if orientation == "asc" {
 			price = red.ZRange(key, 0, 0).Val()
-		} else {
+		} else if orientation == "desc" {
 
 			price = red.ZRevRange(key, 0, 0).Val()
 		}
 	} else if side == "ask" {
-		if (max == true) && (min == false) {
+		if orientation == "asc" {
 			price = red.ZRange(key, 0, 0).Val()
-		} else {
+		} else if orientation == "desc" {
 			price = red.ZRevRange(key, 0, 0).Val()
 		}
 	}
