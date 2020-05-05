@@ -9,13 +9,27 @@ class OrderTree():
         #self.KEY_PRICE_TREE = f"prices-{baseCurrency}-{quoteCurrency}-{side}"
         #self.KEY_TEMPLATE_QUOTE = f"quote-{baseCurrency}-{quoteCurrency}"
         #self.KEY_TEMPLATE_PRICE_QUOTES = f"{side}-{baseCurrency}-{quoteCurrency}-{{price}}"
-
+        
+        self.TRANSACTIONS = 'transactions-%s' % (baseCurrency)# acualizacion de las transacciones 
+        self.TRANSACTIONS_COUNTER = f'transactions-counter-{baseCurrency}'
         self.KEY_PRICE_TREE = 'prices-%s-%s-%s' % (baseCurrency, quoteCurrency, side) #precios
         self.KEY_TEMPLATE_QUOTE = 'quote-%s-%s-%%s' % (baseCurrency, quoteCurrency)  # cotizacion de una orden o la orden misma
         self.KEY_TEMPLATE_PRICE_QUOTES = '%s-%s-%s-%%s' % (side, baseCurrency, quoteCurrency)  # pricios de cotiziones o ordenes
 
     def __len__(self):
         return self.red.zcard(self.KEY_PRICE_TREE)  # se trae todos las ordenes por ese precio
+
+    def saveTransaction(self,transaction):
+        transaction_set = {}
+        transaction_set['qty'] = transaction['qty']
+        transaction_set['price'] = transaction['price']
+        #fixme 
+        # the Ids orders
+        #transaction_set['orderId1'] = transaction['party1']['orderId']
+        #transaction_set['orderId2'] = transaction['party2']['orderId']
+        #import pdb; pdb.set_trace()
+        self.red.hmset(self.TRANSACTIONS ,transaction_set)
+        self.red.incr(self.TRANSACTIONS_COUNTER)
 
     def getPrice(self, price):
         # return self.priceMap[price]
@@ -25,7 +39,8 @@ class OrderTree():
     #    #self.lobDepth -= 1
     #    self.priceTree.remove(price)
     #    del self.priceMap[price]
-
+    
+    
     def orderExist(self, orderId):
 
         return self.red.exists(self.KEY_TEMPLATE_QUOTE % orderId)  # verifica si existe la orden
@@ -55,22 +70,28 @@ class OrderTree():
     #    originalVolume = order.qty
     #    self.volume += order.qty-originalVolume
 
-    def removeOrderById(self, orderId):
-        #self.nOrders -= 1
 
-        order = self.red.hgetall(self.KEY_TEMPLATE_QUOTE % orderId)
+    def getOrderById (self , orderId):
+        order = self.red.hgetall(self.KEY_TEMPLATE_QUOTE % orderId )
         order_dep = {}
         for i in order.keys() : 
             order_dep[i.decode()] = order[i].decode()
+        return order_dep
         
+    def removeOrderById(self, orderId):
+        #self.nOrders -= 1
+        order = self.red.hgetall(self.KEY_TEMPLATE_QUOTE % orderId)
+        if order != {}:
+            order_dep = {}
+            for i in order.keys() : 
+                order_dep[i.decode()] = order[i].decode()
 
+            self.red.lrem(self.KEY_TEMPLATE_PRICE_QUOTES % order_dep['price'], 0, orderId)
 
-        self.red.lrem(self.KEY_TEMPLATE_PRICE_QUOTES % order_dep['price'], 0, orderId)
+            if not self.red.exists(self.KEY_TEMPLATE_PRICE_QUOTES % order_dep['price']):
+                self.red.zrem(self.KEY_PRICE_TREE, order_dep['price'])
 
-        if not self.red.exists(self.KEY_TEMPLATE_PRICE_QUOTES % order_dep['price']):
-            self.red.zrem(self.KEY_PRICE_TREE, order_dep['price'])
-
-        self.red.delete(self.KEY_TEMPLATE_QUOTE % orderId)
+            self.red.delete(self.KEY_TEMPLATE_QUOTE % orderId)
 
     def maxPrice(self):
 
@@ -101,8 +122,9 @@ class OrderTree():
 
     def minPriceList(self):
         orders = []
-        dict_order = {}
+        
         for order in self.red.lrange(self.KEY_TEMPLATE_PRICE_QUOTES % self.minPrice(), 0, -1):
+            dict_order = {}
 
             x = self.red.hgetall(self.KEY_TEMPLATE_QUOTE % int(order))
             for i in x.keys() : 

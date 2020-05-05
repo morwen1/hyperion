@@ -19,8 +19,25 @@ class Order():
         self.timestamp = timestamp
         self.orderId = orderId
     
-    def removeSelfOrder (self):
-        tree.removeOrderById(self.orderId)
+   
+
+    def trasactions (self , tr ,newTrades, book) :
+        if len(newTrades) != 0 :
+            #armo la transaccion en un diccionario para almacenarlo en redis
+            for i in newTrades:
+                i['party2'] = self.__dict__
+                temp_id =i['party1'][2]
+                side = i['party1'][1]
+                i['party1'] = book.getOrderById(temp_id ,side )
+            tr = newTrades
+            if self.side == 'bid':
+                for trades in tr :
+                    book.bids.saveTransaction(trades)
+            if self.side == 'ask':
+                for trades in tr :
+                    book.asks.saveTransaction(trades)
+        
+        return tr
 
     def processPriceLevel(self, book, tree, orderlist, qtyToTrade):
         """
@@ -28,7 +45,6 @@ class Order():
         appropiate trade give the order quantity
         """
         trades = []
-
         for order in orderlist:
             if qtyToTrade <= 0:
                 break
@@ -38,17 +54,17 @@ class Order():
                 newBookQty = order.qty - qtyToTrade
                 tree.updateOrderQuatity(order.orderId, newBookQty)
                 # Incoming done with
-                break
+            
                 qtyToTrade = 0
+                
             elif qtyToTrade == order.qty:
 
                 tradedQty = qtyToTrade
                 # hit bid or lift ask
                 tree.removeOrderById(order.orderId)
-                import pdb; pdb.set_trace()
                 # Incoming done with
-                break
                 qtyToTrade = 0
+                
             else:
                 tradedQty = order.qty
                 # hit bid or lift ask
@@ -64,7 +80,7 @@ class Order():
                 transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
                 transactionRecord['party2'] = [self.traderId, 'bid', None]
             trades.append(transactionRecord)
-            print(trades)
+        #print(trades)
         return qtyToTrade, trades
 
  
@@ -76,13 +92,20 @@ class Bid(Order):
     def limitOrder(self, book, bids, asks):
         trades = []
         orderInBook = None
+        #Consultar saldo del usuario 
         qtyToTrade = self.qty
 
         while (asks and self.price >= asks.minPrice() and qtyToTrade > 0):
             bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId']) for x in asks.minPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade)
-            trades += newTrades
-           
+                                    
+            trades = self.trasactions(trades , newTrades , book)
+            print(trades)
+
+
+        # si la orden no queda en 0 inserta la orden en libro de ordenes 
+        #   esperando otra orden
+
         if qtyToTrade > 0:
             self.orderId = book.getNextQuoteId()
             self.qty = qtyToTrade
@@ -115,7 +138,10 @@ class Ask(Order):
                              for x in bids.maxPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book,  bids, bestPriceBids, qtyToTrade)
             
-            trades += newTrades
+            trades = self.trasactions(trades , newTrades , book)
+           
+        # si la orden no queda en 0 inserta la orden en libro de ordenes 
+        #   esperando otra orden
 
         if qtyToTrade > 0:
             self.orderId = book.getNextQuoteId()
@@ -199,6 +225,20 @@ class OrderBook():
     def getWorstAsk(self):
         return self.asks.minPrice()
 
+
+
+    def getOrderById (self , orderId , side):
+        if side == 'bid':
+
+            order = self.bids.getOrderById(orderId)
+        
+        elif side =='ask':
+            order = self.asks.getOrderById(orderId)
+
+        else :
+            order = {}
+
+        return order
 
     def _clipPrice(self, price):
         """clips the price according to the ticketsize """
