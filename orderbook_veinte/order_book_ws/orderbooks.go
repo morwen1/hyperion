@@ -27,11 +27,13 @@ func BtcOrderBook(w http.ResponseWriter, r *http.Request) {
 	}
 	wsClient = ws
 	counter := len(client.Keys("quote*").Val())
+	counter_transactions := client.Get("transactions-counter-BTC").Val()
 	for {
 		var msg Responses
 
 		c := len(client.Keys("quote*").Val())
-		if c != counter {
+		c_tr := client.Get("transactions-counter-BTC").Val()
+		if c != counter || c_tr != counter_transactions {
 
 			bids := client.GetQuotes(true, 100, "bid")
 			asks := client.GetQuotes(true, 100, "ask")
@@ -45,6 +47,8 @@ func BtcOrderBook(w http.ResponseWriter, r *http.Request) {
 
 			message <- msg
 			counter = len(client.Keys("quote*").Val())
+			counter_transactions = client.Get("transactions-counter-BTC").Val()
+
 			log.Println("change message...  ", counter)
 		}
 

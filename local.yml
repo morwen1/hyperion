@@ -34,10 +34,11 @@ services:
       - django
       - redis 
     volumes : 
-      - .:/app
+      - ./orderbook_veinte/order_book_ws/:/go/src/app
+    working_dir: /go/src/app
     ports:
       - "8001:8001"
-    command: ./app
+    command: go run .
 
 
   postgres:

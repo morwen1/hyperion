@@ -16,8 +16,12 @@ RUN go install -v ./...
 #RUN go get -u -v -f all  
 
 
-RUN go build  . 
 
 #RUN ./order_book_ws
+COPY ./compose/local/golang/start   /start
+RUN sed -i 's/\r$//g' /start
+RUN chmod +x /start
 
-CMD [ "app" ]
+
+CMD [ "app" , "/start" ]
+ENTRYPOINT ["/start"]

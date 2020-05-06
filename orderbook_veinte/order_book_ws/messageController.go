@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/mitchellh/mapstructure"
@@ -25,20 +24,19 @@ func (red *RedisClient) GetQuotes(reverse bool, depth int, side string) []Order 
 	price_key := KEY_PRICE_TREE + side
 	order_price_key := side + KEY_TEMPLATE_PRICE_QUOTES
 	prices, err := red.ZRevRange(price_key, 0, -1).Result()
-	fmt.Println("prices", prices, side, price_key)
+
 	if err != nil {
 		log.Fatal("eror in tree prices or empty")
 
 	}
 
 	for i := 0; i < len(prices); i++ {
-		fmt.Println(order_price_key+prices[i], "prices")
+		//fmt.Println(order_price_key+prices[i], "prices")
 		ordersId, err := red.LRange(order_price_key+prices[i], 0, -1).Result()
 
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &order, WeaklyTypedInput: true})
 		for j := 0; j < len(ordersId); j++ {
-			fmt.Println(ordersId)
-			item, err := red.HGetAll(KEY_TEMPLATE_QUOTE + ordersId[j]).Result()
+			item, _ := red.HGetAll(KEY_TEMPLATE_QUOTE + ordersId[j]).Result()
 
 			err = decoder.Decode(item)
 			if err != nil {
@@ -46,7 +44,7 @@ func (red *RedisClient) GetQuotes(reverse bool, depth int, side string) []Order 
 			}
 			orders = append(orders, order)
 		}
-		log.Println(ordersId, err, "ordersId")
+
 	}
 	return orders
 }
@@ -80,10 +78,13 @@ func (red *RedisClient) GetPrices(orientation string, side string) string {
 
 func (red *RedisClient) GetLastTransaction(coin string) Transaction {
 	var tr Transaction
-	qry := red.HGetAll(KEY_TRANSACTION + coin).Val()
+	qry, _ := red.HGetAll(KEY_TRANSACTION + coin).Result()
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &tr, WeaklyTypedInput: true})
-	if err != nil {
+
+	if err == nil {
 		_ = decoder.Decode(qry)
+
 	}
+
 	return tr
 }
