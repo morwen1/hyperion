@@ -39,47 +39,49 @@ class Order():
         
         return tr
 
-    def processPriceLevel(self, book, tree, orderlist, qtyToTrade):
+    def processPriceLevel(self, book, tree, orderlist, qtyToTrade , priceToTrade):
         """
         takes a price level order list an incoming and matches
         appropiate trade give the order quantity
         """
         trades = []
+        
         for order in orderlist:
-            if qtyToTrade <= 0:
-                break
-            if qtyToTrade < order.qty:
-                tradedQty = qtyToTrade
-                # Amend book order
-                newBookQty = order.qty - qtyToTrade
-                tree.updateOrderQuatity(order.orderId, newBookQty)
-                # Incoming done with
-            
-                qtyToTrade = 0
+            if priceToTrade == order.price :
+                if qtyToTrade <= 0:
+                    break
+                if qtyToTrade < order.qty:
+                    tradedQty = qtyToTrade
+                    # Amend book order
+                    newBookQty = order.qty - qtyToTrade
+                    tree.updateOrderQuatity(order.orderId, newBookQty)
+                    # Incoming done with
                 
-            elif qtyToTrade == order.qty:
+                    qtyToTrade = 0
+                    
+                elif qtyToTrade == order.qty:
 
-                tradedQty = qtyToTrade
-                # hit bid or lift ask
-                tree.removeOrderById(order.orderId)
-                # Incoming done with
-                qtyToTrade = 0
-                
-            else:
-                tradedQty = order.qty
-                # hit bid or lift ask
-                tree.removeOrderById(order.orderId)
-                # continue processing volume at this price
-                qtyToTrade -= tradedQty
+                    tradedQty = qtyToTrade
+                    # hit bid or lift ask
+                    tree.removeOrderById(order.orderId)
+                    # Incoming done with
+                    qtyToTrade = 0
+                    
+                else:
+                    tradedQty = order.qty
+                    # hit bid or lift ask
+                    tree.removeOrderById(order.orderId)
+                    # continue processing volume at this price
+                    qtyToTrade -= tradedQty
 
-            transactionRecord = {'timestamp': book.getTimestamp(), 'price': order.price, 'qty': tradedQty}
-            if tree.side == 'bid':
-                transactionRecord['party1'] = [order.traderId, 'bid', order.orderId]
-                transactionRecord['party2'] = [self.traderId, 'ask', None]
-            else:
-                transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
-                transactionRecord['party2'] = [self.traderId, 'bid', None]
-            trades.append(transactionRecord)
+                transactionRecord = {'timestamp': book.getTimestamp(), 'price': order.price, 'qty': tradedQty}
+                if tree.side == 'bid':
+                    transactionRecord['party1'] = [order.traderId, 'bid', order.orderId]
+                    transactionRecord['party2'] = [self.traderId, 'ask', None]
+                else:
+                    transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
+                    transactionRecord['party2'] = [self.traderId, 'bid', None]
+                trades.append(transactionRecord)
         #print(trades)
         return qtyToTrade, trades
 
@@ -97,10 +99,10 @@ class Bid(Order):
 
         while (asks and self.price >= asks.minPrice() and qtyToTrade > 0):
             bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId']) for x in asks.minPriceList()]
-            qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade)
+            
+            qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade , self.price)
                                     
             trades = self.trasactions(trades , newTrades , book)
-            print(trades)
 
 
         # si la orden no queda en 0 inserta la orden en libro de ordenes 
@@ -119,7 +121,7 @@ class Bid(Order):
         qtyToTrade = self.qty
         while qtyToTrade > 0 and self.asks:
             bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId']) for x in asks.minPriceList()]
-            qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade)
+            qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade , self.price)
             trades += newTrades
         return trades
 
@@ -136,7 +138,7 @@ class Ask(Order):
         while (bids and self.price <= bids.maxPrice() and qtyToTrade > 0):
             bestPriceBids = [Bid(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'])
                              for x in bids.maxPriceList()]
-            qtyToTrade, newTrades = self.processPriceLevel(book,  bids, bestPriceBids, qtyToTrade)
+            qtyToTrade, newTrades = self.processPriceLevel(book,  bids, bestPriceBids, qtyToTrade , self.price)
             
             trades = self.trasactions(trades , newTrades , book)
            
@@ -158,7 +160,7 @@ class Ask(Order):
         while qtyToTrade > 0 and self.bids:
             bestPriceBids = [Bid(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'])
                              for x in bids.maxPriceList()]
-            qtyToTrade, newTrades = self.processPriceLevel(book, bids, bestPriceBids, qtyToTrade,)
+            qtyToTrade, newTrades = self.processPriceLevel(book, bids, bestPriceBids, qtyToTrade, self.price)
             trades += newTrades
 
         return trades

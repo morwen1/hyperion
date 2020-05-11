@@ -12,7 +12,6 @@ services:
     image: orderbook_veinte_local_django
     depends_on:
       - postgres
-      - mailhog
       - redis
     volumes:
       - .:/app
@@ -54,10 +53,7 @@ services:
     ports:
       - "5432:5432"
 
-  mailhog:
-    image: mailhog/mailhog:v1.0.0
-    ports:
-      - "8025:8025"
+
 
   redis:
     image: redis:5.0
@@ -68,9 +64,9 @@ services:
     <<: *django
     image: orderbook_veinte_local_celeryworker
     depends_on:
+      - django
       - redis
       - postgres
-      - mailhog
     ports: []
     command: /start-celeryworker
 
@@ -78,10 +74,10 @@ services:
     <<: *django
     image: orderbook_veinte_local_celerybeat
     depends_on:
+      - django
       - redis
       - postgres
-      - mailhog
-      - django
+      
     ports: []
     command: /start-celerybeat
 

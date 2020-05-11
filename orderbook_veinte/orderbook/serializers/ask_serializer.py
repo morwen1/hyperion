@@ -6,9 +6,8 @@ from rest_framework import serializers
 #MODELS 
 from orderbook_veinte.orderbook.models import Orders
 #Orerbook
-from orderbook_veinte.orderbook.tree import initializeTree
 from orderbook_veinte.orderbook.tree import Ask
-from orderbook_veinte.orderbook import tasks
+from orderbook_veinte.orderbook.tasks import AsincronicOrderProces
 
 
 class AsksSerializers(serializers.ModelSerializer):
@@ -17,9 +16,9 @@ class AsksSerializers(serializers.ModelSerializer):
         fields = ('traderId','timestamp' , 'qty' , 'price')
     def create(self , validated_data):
 
-        ob = initializeTree()
         ask = Ask(**validated_data  )
-        tasks.AsincronicOrderProces(ob,ask)
+        AsincronicOrderProces.delay(order=ask.__dict__ , side ='ask')
+
         existence_order =False #Orders.objects.filter(**validated_data , Ask=True).exists()
 
         if  existence_order == False:
@@ -34,7 +33,6 @@ class AsksSerializers(serializers.ModelSerializer):
         else: 
             order = Orders.objects.get(**validated_data , Ask=True)
             raise serializers.ValidationError(f'order {order.orderId} exists :c ' )
-
 
         return order   
 
