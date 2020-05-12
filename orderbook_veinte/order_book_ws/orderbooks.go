@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -33,7 +34,8 @@ func BtcOrderBook(w http.ResponseWriter, r *http.Request) {
 
 		c := len(client.Keys("quote*").Val())
 		c_tr := client.Get("transactions-counter-BTC").Val()
-		if c != counter || c_tr != counter_transactions {
+		time.Sleep(10 * time.Millisecond)                 // descanso de las peticiones
+		if c != counter || c_tr != counter_transactions { //validacion de las llaves que hay en redis
 
 			bids := client.GetQuotes(true, 100, "bid")
 			asks := client.GetQuotes(true, 100, "ask")
