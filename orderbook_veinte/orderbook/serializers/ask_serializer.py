@@ -15,9 +15,8 @@ class AsksSerializers(serializers.ModelSerializer):
         model = Orders
         fields = ('traderId','timestamp' , 'qty' , 'price')
     def create(self , validated_data):
-
         ask = Ask(**validated_data  )
-        AsincronicOrderProces.delay(order=ask.__dict__ , side ='ask')
+        AsincronicOrderProces.delay(order=ask.__dict__ , side ='ask', qty= self.context['qty'], price= self.context['price'] )
 
         existence_order =False #Orders.objects.filter(**validated_data , Ask=True).exists()
 

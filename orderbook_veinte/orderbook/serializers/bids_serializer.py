@@ -20,9 +20,8 @@ class BidsSerializers(serializers.ModelSerializer):
         fields = ('traderId','timestamp' , 'qty' , 'price')
     def create(self , validated_data):
 
-        ob = initializeTree()
         bid = Bid(**validated_data  )
-        AsincronicOrderProces.delay(order=bid.__dict__ , side ='bid')
+        AsincronicOrderProces.delay(order=bid.__dict__ , side ='bid' , qty= self.context['qty'], price= self.context['price'])
 
 
         existence_order =False#Orders.objects.filter(**validated_data , Bid=True).exists()

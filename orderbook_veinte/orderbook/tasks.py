@@ -6,9 +6,9 @@ from orderbook_veinte.orderbook.tree import Ask ,Bid
 
 
 @task(name="processingOrder" )
-def AsincronicOrderProces (order , side  ):
+def AsincronicOrderProces (order , side , price , qty ):
     del order['side']
-    ob = initializeTree()
+    ob = initializeTree(qty,price)
     if side == 'ask':
         orderobj = Ask(**order)
     elif side == 'bid':

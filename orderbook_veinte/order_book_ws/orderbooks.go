@@ -31,7 +31,7 @@ func BtcOrderBook(w http.ResponseWriter, r *http.Request) {
 	counter_transactions := client.Get("transactions-counter-BTC").Val()
 	for {
 		var msg Responses
-		time.Sleep(10 * time.Millisecond) // descanso de las peticiones
+		time.Sleep(100 * time.Millisecond) // descanso de las peticiones
 
 		c := len(client.Keys("quote*").Val())
 		c_tr := client.Get("transactions-counter-BTC").Val()
