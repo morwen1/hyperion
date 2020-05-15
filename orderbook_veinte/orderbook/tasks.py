@@ -5,6 +5,9 @@ from orderbook_veinte.orderbook.tree import initializeTree
 from orderbook_veinte.orderbook.tree import Ask ,Bid
 
 
+
+
+#Process order
 @task(name="processingOrder" )
 def AsincronicOrderProces (order , side , price , qty ):
     del order['side']
@@ -15,3 +18,13 @@ def AsincronicOrderProces (order , side , price , qty ):
         orderobj = Bid(**order)
     trades , orderInbook = ob.processOrder(orderobj)
     return trades 
+
+
+#Transaction
+def Transaction(transaction):
+    pass
+
+
+#Notifications
+def Notifications(event):
+    pass

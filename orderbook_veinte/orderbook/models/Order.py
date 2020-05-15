@@ -5,6 +5,10 @@ from django.db import models
 #MODELS
 from . import AbOrderbook
 
+class OrderStatus (AbOrderbook):
+    status = models.CharField(max_length=255)
+    description  = models.TextField()
+
 
 class Orders ( AbOrderbook):
     """
@@ -15,11 +19,12 @@ class Orders ( AbOrderbook):
     orderId = models.AutoField(primary_key = True , help_text = "id of the Trade auto increment field")
     traderId = models.CharField(max_length = 255) 
     timestamp= models.TimeField()
-    qty = models.FloatField()
+    qty = models.IntegerField()
     price = models.FloatField()
+    close_qty = models.IntegerField()
     Bid = models.BooleanField(default=False)
     Ask = models.BooleanField(default=False)
-    
-    def __str__(self):
+    status = models.ForeignKey(to=OrderStatus)
 
+    def __str__(self):
         return f"{self.orderId } , {self.traderId}"
