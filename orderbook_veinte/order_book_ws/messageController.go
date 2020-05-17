@@ -9,20 +9,16 @@ import (
 // zrevrange  "prices-BTC-XLT-ask"  0 -1  best price ask
 // zrevrange "prices-BTC-XLT-bid" 0 -1 best price bid
 
-//KEY_PRICE_TREE = rama precios moneda-cotizacion-lado(ask,bid)
-//KEY_TEMPLATE_QUOTE = rama ordenes  quote-moneda-cotizacion-ordenId
-//KEY_TEMPLATE_PRICE_QUOTES = devuelve el id de esa cotizacion aputador para poder obtener las ordenes
-//  KEY_PRICE_TREE > KEY_TEMPLATE_PRICE_QUOTES >KEY_TEMPLATE_PRICE_QUOTES = para traerme todas las ordenes
-var KEY_PRICE_TREE = "prices-BTC-XLT-"
-var KEY_TEMPLATE_QUOTE = "quote-BTC-XLT-"
-var KEY_TEMPLATE_PRICE_QUOTES = "-BTC-XLT-"
-var KEY_TRANSACTION = "transactions-"
+//var keys["KEY_PRICE_TREE"] =
+//var keys["KEY_TEMPLATE_QUOTE"] = "quote-BTC-XLT-"
+//var keys["KEY_TEMPLATE_PRICE_QUOTES"] = "-BTC-XLT-"
+//var keys["KEY_TRANSACTION"] = "transactions-"
 
-func (red *RedisClient) GetQuotes(reverse bool, depth int, side string) []Order {
+func (red *RedisClient) GetQuotes(reverse bool, depth int, side string, keys map[string]string) []Order {
 	var orders []Order
 	var order Order
-	price_key := KEY_PRICE_TREE + side
-	order_price_key := side + KEY_TEMPLATE_PRICE_QUOTES
+	price_key := keys["KEY_PRICE_TREE"] + side
+	order_price_key := side + keys["KEY_TEMPLATE_PRICE_QUOTES"]
 	prices, err := red.ZRevRange(price_key, 0, -1).Result()
 
 	if err != nil {
@@ -36,7 +32,7 @@ func (red *RedisClient) GetQuotes(reverse bool, depth int, side string) []Order 
 
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &order, WeaklyTypedInput: true})
 		for j := 0; j < len(ordersId); j++ {
-			item, _ := red.HGetAll(KEY_TEMPLATE_QUOTE + ordersId[j]).Result()
+			item, _ := red.HGetAll(keys["KEY_TEMPLATE_QUOTE"] + ordersId[j]).Result()
 
 			err = decoder.Decode(item)
 			if err != nil {
@@ -49,9 +45,9 @@ func (red *RedisClient) GetQuotes(reverse bool, depth int, side string) []Order 
 	return orders
 }
 
-func (red *RedisClient) GetPrices(orientation string, side string) string {
+func (red *RedisClient) GetPrices(orientation string, side string, keys map[string]string) string {
 	price := make([]string, 0, 1)
-	key := KEY_PRICE_TREE + side
+	key := keys["KEY_PRICE_TREE"] + side
 	if side == "bid" {
 		if orientation == "asc" {
 			price = red.ZRange(key, 0, 0).Val()
@@ -76,9 +72,10 @@ func (red *RedisClient) GetPrices(orientation string, side string) string {
 	return result
 }
 
-func (red *RedisClient) GetLastTransaction(coin string) Transaction {
+func (red *RedisClient) GetLastTransaction(keys map[string]string) Transaction {
 	var tr Transaction
-	qry, _ := red.HGetAll(KEY_TRANSACTION + coin).Result()
+	log.Println(keys)
+	qry, _ := red.HGetAll(keys["KEY_TRANSACTION"]).Result()
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &tr, WeaklyTypedInput: true})
 
 	if err == nil {

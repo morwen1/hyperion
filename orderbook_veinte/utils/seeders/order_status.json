@@ -1,0 +1,29 @@
+[
+    {
+       "model":"orderbook.OrderStatus",
+       "pk":1 ,
+       "fields":{
+           "status":"partial",
+           "description":"order complete partialy",
+           "created_at":"2019-04-15 19:18:00"
+        }
+    },
+    {
+        "model":"orderbook.OrderStatus",
+        "pk":2,
+        "fields":{
+            "status":"completed",
+            "description":"order close completed",
+            "created_at":"2019-04-15 19:18:00"
+        }
+    },
+    {
+        "model":"orderbook.OrderStatus",
+        "pk":3,
+        "fields":{
+            "status":"open",
+            "description":"order opened",
+            "created_at":"2020-04-15 19:18:00"
+        }
+    }
+]

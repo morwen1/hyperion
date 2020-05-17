@@ -6,6 +6,6 @@ import (
 
 func Router() *mux.Router {
 	r := mux.NewRouter().StrictSlash(false)
-	r.HandleFunc("/ws/btc/", BtcOrderBook).Methods("GET")
+	r.HandleFunc("/ws/{qty}/{price}", OrderBook).Methods("GET")
 	return r
 }

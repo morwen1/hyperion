@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/mux"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -19,8 +21,13 @@ var upgrader = websocket.Upgrader{
 var message = make(chan Responses)
 var wsClient *websocket.Conn
 
-func BtcOrderBook(w http.ResponseWriter, r *http.Request) {
+func OrderBook(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	var QTY = vars["qty"]
+	var PRICE = vars["price"]
+
 	client := GetRedisClient()
+	keys := client.GenaratorKeys(PRICE, QTY)
 	ws, err := upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
@@ -28,28 +35,28 @@ func BtcOrderBook(w http.ResponseWriter, r *http.Request) {
 	}
 	wsClient = ws
 	counter := len(client.Keys("quote*").Val())
-	counter_transactions := client.Get("transactions-counter-BTC").Val()
+	counter_transactions := client.Get(keys["KEY_TRANSACTION"]).Val()
 	for {
 		var msg Responses
 		time.Sleep(100 * time.Millisecond) // descanso de las peticiones
 
 		c := len(client.Keys("quote*").Val())
-		c_tr := client.Get("transactions-counter-BTC").Val()
+		c_tr := client.Get(keys["KEY_TRANSACTION"]).Val()
 		if c != counter || c_tr != counter_transactions { //validacion de las llaves que hay en redis
 
-			bids := client.GetQuotes(true, 100, "bid")
-			asks := client.GetQuotes(true, 100, "ask")
+			bids := client.GetQuotes(true, 100, "bid", keys)
+			asks := client.GetQuotes(true, 100, "ask", keys)
 			msg.Asks = asks
 			msg.Bids = bids
-			msg.MinPriceAsk = client.GetPrices("asc", "ask")
-			msg.MinPriceBid = client.GetPrices("asc", "bid")
-			msg.MaxPriceAsk = client.GetPrices("desc", "ask")
-			msg.MaxPriceBid = client.GetPrices("desc", "bid")
-			msg.LastTransaction = client.GetLastTransaction("BTC")
+			msg.MinPriceAsk = client.GetPrices("asc", "ask", keys)
+			msg.MinPriceBid = client.GetPrices("asc", "bid", keys)
+			msg.MaxPriceAsk = client.GetPrices("desc", "ask", keys)
+			msg.MaxPriceBid = client.GetPrices("desc", "bid", keys)
+			msg.LastTransaction = client.GetLastTransaction(keys)
 
 			message <- msg
 			counter = len(client.Keys("quote*").Val())
-			counter_transactions = client.Get("transactions-counter-BTC").Val()
+			counter_transactions = client.Get(keys["KEY_TRANSACTION"]).Val()
 
 			log.Println("change message...  ", counter)
 		}

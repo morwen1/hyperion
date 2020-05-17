@@ -23,7 +23,8 @@ def initializeTree(qty, price):
         "PCH"
     ]}
     print(qty , price)
-    if qty in options['cripto'] and price in options['fiat']:
+    #todas contra todas menos con ella misma 
+    if (qty in options['cripto'] or qty in options['fiat']) and (price in options['cripto'] or price in options['fiat']) and price != qty:
 
         ob = OrderBook(qty, price , red)
         return ob

@@ -6,7 +6,7 @@ from django.db.models import Count , Avg , Min ,Sum
 
 from orderbook_veinte.orderbook.models import Transactions ,Orders
 
-class Transacctions() :
+class TransactionsManger() :
     """
         Utilities to  general transactions in the orderbook 
     
@@ -28,9 +28,9 @@ class Transacctions() :
         else : 
             raise "transaction qty is not valid"
         transaction = Transactions.objects.create(
-            buyer = buyer 
-            seller = seller
-            qty = self.qty 
+            buyer = buyer ,
+            seller = seller,
+            qty = self.qty ,
             type_transaction = transaction_type 
 
         )
@@ -62,8 +62,8 @@ def manage_qty(qty , type_qty = str ):
     if type_qty in ['in' , 'out'] :
         if type_qty == 'in':
             response = float(qty)*unity
-        elif type_qty == 'out' {
+        elif type_qty == 'out' :
             response =  float(qty)/unity
-        }
+        
     return response 
 

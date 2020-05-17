@@ -6,12 +6,10 @@ class OrderTree():
         self.side = side
         self.red = red
 
-        #self.KEY_PRICE_TREE = f"prices-{baseCurrency}-{quoteCurrency}-{side}"
-        #self.KEY_TEMPLATE_QUOTE = f"quote-{baseCurrency}-{quoteCurrency}"
-        #self.KEY_TEMPLATE_PRICE_QUOTES = f"{side}-{baseCurrency}-{quoteCurrency}-{{price}}"
-        
-        self.TRANSACTIONS = 'transactions-%s' % (baseCurrency)# acualizacion de las transacciones 
-        self.TRANSACTIONS_COUNTER = f'transactions-counter-{baseCurrency}'
+
+        #llaves de transacciones 
+        self.TRANSACTIONS = 'transactions-%s-%s' % (baseCurrency , quoteCurrency) # acualizacion de las transacciones 
+        self.TRANSACTIONS_COUNTER = f'transactions-counter-{baseCurrency}-{quoteCurrency}'
         self.KEY_PRICE_TREE = 'prices-%s-%s-%s' % (baseCurrency, quoteCurrency, side) #precios
         self.KEY_TEMPLATE_QUOTE = 'quote-%s-%s-%%s' % (baseCurrency, quoteCurrency)  # cotizacion de una orden o la orden misma
         self.KEY_TEMPLATE_PRICE_QUOTES = '%s-%s-%s-%%s' % (side, baseCurrency, quoteCurrency)  # pricios de cotiziones o ordenes
