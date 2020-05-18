@@ -9,8 +9,8 @@ else:
     router = SimpleRouter()
 
 #router.register("users", UserViewSet)
-router.register(r'bids/(?P<qty>[A-z]+)/(?P<price>[A-z]+)' , CreateBids)
-router.register(r'asks/(?P<qty>[A-z]+)/(?P<price>[A-z]+)' , CreateAsks)
+router.register(r'orderbook/bids/(?P<qty>[A-z]+)/(?P<price>[A-z]+)' , CreateBids)
+router.register(r'orderbook/asks/(?P<qty>[A-z]+)/(?P<price>[A-z]+)' , CreateAsks)
 app_name = "api"
 urlpatterns = router.urls
 
