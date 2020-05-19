@@ -18,21 +18,16 @@ class AsksSerializers(serializers.ModelSerializer):
         ask = Ask(**validated_data  )
         AsincronicOrderProces.delay(order=ask.__dict__ , side ='ask', qty= self.context['qty'], price= self.context['price'] )
 
-        existence_order =False #Orders.objects.filter(**validated_data , Ask=True).exists()
 
-        if  existence_order == False:
-            order = Orders.objects.create(
+        order = Orders.objects.create(
                 Ask = True , 
 
                 Bid = False,
                 **validated_data
             )
 
-            order.save()
-        else: 
-            order = Orders.objects.get(**validated_data , Ask=True)
-            raise serializers.ValidationError(f'order {order.orderId} exists :c ' )
-
+        order.save()
+       
         return order   
 
 

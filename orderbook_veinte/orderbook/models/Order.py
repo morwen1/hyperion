@@ -32,7 +32,7 @@ class Orders ( AbOrderbook):
         to=OrderStatus,
         on_delete= models.SET_NULL ,
         null =True ,
-        blank= True)
+        blank= True , )
 
     def __str__(self):
-        return f"{self.orderId } , {self.traderId} , {self.status__status}"
+        return f"{self.orderId } , {self.traderId} , {self.status}"

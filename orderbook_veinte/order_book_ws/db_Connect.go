@@ -5,6 +5,8 @@ import (
 	"sync"
 
 	"github.com/go-redis/redis"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 type RedisClient struct{ *redis.Client } //redis client strcuture form
@@ -27,4 +29,13 @@ func GetRedisClient() *RedisClient {
 
 	}
 	return redisClient
+}
+
+func PsqlClient() *gorm.DB {
+
+	client, err := gorm.Open("postgres", "host=postgres://", "user=debug", "dbanme=orderbook_veinte", "password=debug")
+	if err != nil {
+		log.Panic("postgres conn failed")
+	}
+	return client
 }

@@ -22,6 +22,8 @@ from orderbook_veinte.orderbook.models import Transactions
 
 from orderbook_veinte.utils.manage_transaction import TransactionsManger
 
+
+
 #Process order
 @task(name="processingOrder" )
 def AsincronicOrderProces (order , side , price , qty ):
@@ -34,14 +36,29 @@ def AsincronicOrderProces (order , side , price , qty ):
     trades , orderInbook = ob.processOrder(orderobj)
     if len(trades) > 0 :
         Transaction.delay(trades)
+
     return trades 
 
 
 #Transaction
 @task(name="processingTransaction")
 def Transaction(transaction):
-    status = OrderStatus.objects.all()
-       
+    #tru = transaction unit
+    #trm = transaction manager
+    for tru in transaction : 
+        side1 = tru['party2']
+        side2 = tru['party1']
+
+        qty = tru['qty']
+        price = tru['price']
+        
+        trm = TransactionsManger(side1 , side2 ,qty , price )
+        trm.saving_transactions()
+    
+
+
+
+
 
     
 

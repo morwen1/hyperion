@@ -1,9 +1,17 @@
 import math
 import time
+from datetime import datetime
 from io import StringIO
 
 
 from .OrderTree import OrderTree
+
+#django orm 
+from django.db.models import  Q
+
+#models
+from orderbook_veinte.orderbook.models import Orders
+
 
 #__all__ = ['OrderException', 'OrderQuantityError', 'OrderPriceError', 'Bid', 'Ask', 'Trade', 'OrderBook']
 # qty = cantidad quantity
@@ -26,10 +34,17 @@ class Order():
             #armo la transaccion en un diccionario para almacenarlo en redis
             for i in newTrades:
                 i['party2'] = self.__dict__
+                tr = i['party2']
+                i['party2']['orderId'] =Orders.objects.filter(
+                    Q(traderId=tr['traderId']) & Q(price=tr['price'])
+                    ).last().orderId
                 temp_id =i['party1'][2]
                 side = i['party1'][1]
                 i['party1'] = book.getOrderById(temp_id ,side )
+                
             tr = newTrades
+
+            print("tr " , tr)
             if self.side == 'bid':
                 for trades in tr :
                     book.bids.saveTransaction(trades)
@@ -75,12 +90,13 @@ class Order():
                     qtyToTrade -= tradedQty
 
                 transactionRecord = {'timestamp': book.getTimestamp(), 'price': order.price, 'qty': tradedQty}
+                
                 if tree.side == 'bid':
                     transactionRecord['party1'] = [order.traderId, 'bid', order.orderId]
                     transactionRecord['party2'] = [self.traderId, 'ask', None]
                 else:
                     transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
-                    transactionRecord['party2'] = [self.traderId, 'bid', None]
+                    transactionRecord['party2'] = [self.traderId, 'bid',None ]
                 trades.append(transactionRecord)
         #print(trades)
         return qtyToTrade, trades

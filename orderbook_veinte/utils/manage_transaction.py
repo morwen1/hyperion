@@ -4,9 +4,9 @@
 #DJANGO MODELS
 from django.db.models import Count , Avg , Min ,Sum
 
-from orderbook_veinte.orderbook.models import Transactions ,Orders
+from orderbook_veinte.orderbook.models import Transactions ,Orders , OrderStatus
 
-class TransactionsManger() :
+class TransactionsManger :
     """
         Utilities to  general transactions in the orderbook 
     
@@ -18,22 +18,55 @@ class TransactionsManger() :
         self.price = price 
     
     def saving_transactions (self):
-        buyer = Orders.objects.get( orderId = self.side1['orderId'])
-        seller =Orders.objects.get( orderId = self.side2['orderId'])
-        
-        if self.qty < seller.qty :
+        status_orders = OrderStatus.objects.all()
+
+        #verificacion de los lados de la transaccion
+        if self.side1['side'] == 'ask':
+            
+            seller = Orders.objects.get( orderId = int(self.side1['orderId']))
+            seller.close_qty = int(self.side1['qty'])
+            buyer =Orders.objects.get( orderId = int(self.side2['orderId']))
+            buyer.close_qty = int(self.side2['qty'])
+        elif self.side1['side'] == 'bid':
+            buyer = Orders.objects.get( orderId = int(self.side1['orderId']))
+            buyer.close_qty = int(self.side1['qty'])
+            seller =Orders.objects.get( orderId = int(self.side2['orderId']))
+            seller.close_qty = int(self.side2['qty'])
+
+        #validacion de los tipos de transacciones y los estados de las ordenes
+        if self.qty < seller.close_qty  :
             transaction_type = 'partial'
-        elif self.qty == seller.qty :
-            transaction_type ='complete'
+            seller.status=status_orders.get(status = 'open')
+        elif self.qty < buyer.close_qty : 
+            transaction_type = 'partial'
+            buyer.status = status_orders.get(staus='open')
+        elif self.qty > seller.close_qty  :
+            transaction_type = 'partial'
+            seller.status=status_orders.get(status = 'close')
+        elif self.qty > buyer.close_qty : 
+            transaction_type = 'partial'
+            buyer.status = status_orders.get(staus='close')
+    
+        elif self.qty > buyer.close_qty and self.qty > buyer.close_qty : 
+            transaction_type = 'complete'
+            buyer.status = status_orders.get(staus='close')
+            seller.status=status_orders.get(status = 'close')
+
+        
         else : 
             raise "transaction qty is not valid"
+
+    
         transaction = Transactions.objects.create(
             buyer = buyer ,
             seller = seller,
             qty = self.qty ,
-            type_transaction = transaction_type 
+            type_transaction = transaction_type ,
+            price = self.price 
 
         )
+
+
 
     def get_number_of_transactions(self):
         transactions = Transacctions.objects.count()
@@ -50,6 +83,8 @@ class TransactionsManger() :
         return qty_avg ,price_avg
 
 
+    def processTransaction(self):
+        pass
     
 
 
