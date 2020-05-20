@@ -5,7 +5,6 @@
 from django.db.models import Count , Avg , Min ,Sum
 
 from orderbook_veinte.orderbook.models import Transactions ,Orders , OrderStatus
-
 class TransactionsManger :
     """
         Utilities to  general transactions in the orderbook 
@@ -21,12 +20,15 @@ class TransactionsManger :
         status_orders = OrderStatus.objects.all()
 
         #verificacion de los lados de la transaccion
+        print(self.side1)
         if self.side1['side'] == 'ask':
             
             seller = Orders.objects.get( orderId = int(self.side1['orderId']))
             seller.close_qty = int(self.side1['qty'])
             buyer =Orders.objects.get( orderId = int(self.side2['orderId']))
             buyer.close_qty = int(self.side2['qty'])
+
+
         elif self.side1['side'] == 'bid':
             buyer = Orders.objects.get( orderId = int(self.side1['orderId']))
             buyer.close_qty = int(self.side1['qty'])
@@ -39,18 +41,18 @@ class TransactionsManger :
             seller.status=status_orders.get(status = 'open')
         elif self.qty < buyer.close_qty : 
             transaction_type = 'partial'
-            buyer.status = status_orders.get(staus='open')
+            buyer.status = status_orders.get(status='open')
         elif self.qty > seller.close_qty  :
             transaction_type = 'partial'
-            seller.status=status_orders.get(status = 'close')
+            seller.status=status_orders.get(status = 'completed')
         elif self.qty > buyer.close_qty : 
             transaction_type = 'partial'
-            buyer.status = status_orders.get(staus='close')
+            buyer.status = status_orders.get(status='close')
     
         elif self.qty > buyer.close_qty and self.qty > buyer.close_qty : 
             transaction_type = 'complete'
-            buyer.status = status_orders.get(staus='close')
-            seller.status=status_orders.get(status = 'close')
+            buyer.status = status_orders.get(status='close')
+            seller.status=status_orders.get(status = 'completed')
 
         
         else : 
@@ -62,8 +64,10 @@ class TransactionsManger :
             seller = seller,
             qty = self.qty ,
             type_transaction = transaction_type ,
-            price = self.price 
-
+            price = self.price ,
+            market_price = buyer.market_price,
+            market_qty = buyer.market_qty,
+        
         )
 
 
@@ -86,7 +90,6 @@ class TransactionsManger :
     def processTransaction(self):
         pass
     
-
 
 
 

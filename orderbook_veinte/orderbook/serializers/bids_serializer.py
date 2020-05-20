@@ -24,6 +24,7 @@ class BidsSerializers(serializers.ModelSerializer):
         #se activa la tarea de procesar orden
         AsincronicOrderProces.delay(
             order=bid.__dict__ , side ='bid' ,
+            
             qty= self.context['qty'],
             price= self.context['price'])
 
@@ -33,7 +34,8 @@ class BidsSerializers(serializers.ModelSerializer):
         if  existence_order == False:
             order = Orders.objects.create(
                 Bid = True , 
-
+                market_qty= self.context['qty'],
+                market_price =self.context['price'],
                 Ask = False,
                 **validated_data
             )

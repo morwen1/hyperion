@@ -29,20 +29,67 @@ class Order():
     
    
 
-    def trasactions (self , tr ,newTrades, book) :
+    def trasactions (self , tr ,newTrades, book , Order) :
         if len(newTrades) != 0 :
             #armo la transaccion en un diccionario para almacenarlo en redis
+            tr2 = {}
+            temp_id = 0 
+            side = ''
             for i in newTrades:
-                i['party2'] = self.__dict__
-                tr = i['party2']
-                i['party2']['orderId'] =Orders.objects.filter(
-                    Q(traderId=tr['traderId']) & Q(price=tr['price'])
-                    ).last().orderId
-                temp_id =i['party1'][2]
-                side = i['party1'][1]
-                i['party1'] = book.getOrderById(temp_id ,side )
-                
-            tr = newTrades
+                print("trades  " , i , "\n*3")
+
+                if None in i['party2'] or i['party2'] == {}:
+
+                    i['party2'] = self.__dict__
+                    print("party2 testing",i['party2'])
+                    tr2 = i['party2']
+                    i['party2'].pop('orderId')
+                    id_order = Orders.objects.filter(
+                        Q(traderId=tr2['traderId']) & Q(price=tr2['price'])
+                        ).first().orderId
+                    
+                    i['party2']['orderId'] = id_order
+                    temp_id =i['party1'][2]
+                    side = i['party1'][1]
+                    i['party1'] = book.getOrderById(temp_id ,side )
+                    if i['party1'] == {} :
+                        objprt = Orders.objects.filter(orderId = temp_id).last()
+
+                        i['party1']['side'] = side 
+                        i['party1']['qty']= objprt.qty
+                        i['party1']['price']  =  objprt.price 
+                        i['party1']['traderId']  =objprt.traderId
+                        i['party1']['timestamp']  =objprt.timestamp
+                        i['party1']['orderId']  =objprt.orderId 
+
+                    tr.append(i)
+                    
+
+                elif None in i['party1'] or i['party1'] == {}:
+
+                    print(i['party1'])
+                    i['party1'] = self.__dict__
+
+                    tr2 = i['party1']
+                    i['party1']['orderId'] =Orders.objects.filter(
+                        Q(traderId=tr2['traderId']) & Q(price=tr2['price'])
+                        ).first().orderId
+                    temp_id =i['party2'][2]
+                    side = i['party2'][1]
+                    i['party2'] = book.getOrderById(temp_id ,side )
+                    if i['party2'] == {}  :
+                        
+                        objprt = Orders.objects.filter(orderId = temp_id).last()
+                        
+                        i['party2']['side'] = side 
+                        i['party2']['qty']= objprt.qty
+                        i['party2']['price']  =  objprt.price 
+                        i['party2']['traderId']  =objprt.traderId
+                        i['party2']['timestamp']  =objprt.timestamp
+                        i['party2']['orderId']  =objprt.orderId 
+
+                    tr.append(i)
+                    
 
             print("tr " , tr)
             if self.side == 'bid':
@@ -118,7 +165,7 @@ class Bid(Order):
             
             qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade , self.price)
                                     
-            trades = self.trasactions(trades , newTrades , book)
+            trades = self.trasactions(trades , newTrades , book  ,Order)
 
 
         # si la orden no queda en 0 inserta la orden en libro de ordenes 
@@ -156,7 +203,7 @@ class Ask(Order):
                              for x in bids.maxPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book,  bids, bestPriceBids, qtyToTrade , self.price)
             
-            trades = self.trasactions(trades , newTrades , book)
+            trades = self.trasactions(trades , newTrades , book , Order)
            
         # si la orden no queda en 0 inserta la orden en libro de ordenes 
         #   esperando otra orden

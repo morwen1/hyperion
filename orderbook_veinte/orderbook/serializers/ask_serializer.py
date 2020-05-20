@@ -21,7 +21,8 @@ class AsksSerializers(serializers.ModelSerializer):
 
         order = Orders.objects.create(
                 Ask = True , 
-
+                market_qty= self.context['qty'],
+                market_price =self.context['price'],
                 Bid = False,
                 **validated_data
             )
