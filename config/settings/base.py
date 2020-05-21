@@ -298,6 +298,9 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ),
+     'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 # Your stuff...
@@ -321,3 +324,9 @@ CACHES = {
 REDIS = {
     'url' : env("REDIS_URL_TREE") , 
 }
+
+CORS_ORIGIN_WHITELIST = (
+    'google.com',
+    'veinte.net',
+    'localhost'
+)

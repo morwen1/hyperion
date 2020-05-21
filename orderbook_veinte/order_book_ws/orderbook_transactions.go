@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -43,30 +44,30 @@ func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	var QTY = vars["qty"]
 	var PRICE = vars["price"]
-	var CANT = vars["cant"]
+	var LIMIT = vars["limit"]
 
 	client := PsqlClient()
 	ws, err := upgradertr.Upgrade(w, r, nil)
 	if err != nil {
 		log.Panic("bad request")
 
-		wsClientr = ws
-		if QTY != PRICE {
-			if (InBool(cripto, QTY) || InBool(fiat, QTY)) && (InBool(cripto, PRICE) || InBool(fiat, PRICE)) {
-				for {
-					var msg trModel
-
-					//consulta de sql formada con gorm trae todo lo que esta en la tabla limitando por cant y ordenada de mayor a menro con el crated_at
-					client.Table("orderbook_transactions").Select(" qty , price , type_transaction").Where("marquet_qty = ? and marquet_price = ?", QTY, PRICE).Order("crated_at ASC").Limit(CANT).Scan(&msg)
-					messagetr <- msg
-				}
-			} else {
-				wsClientr.Close()
+	}
+	wsClientr = ws
+	if QTY != PRICE {
+		if (InBool(cripto, QTY) || InBool(fiat, QTY)) && (InBool(cripto, PRICE) || InBool(fiat, PRICE)) {
+			for {
+				var msg trModel
+				//consulta de sql formada con gorm trae todo lo que esta en la tabla limitando por cant y ordenada de mayor a menro con el crated_at
+				client.Table("orderbook_transactions").Select(" qty , price , type_transaction").Where("market_qty = ? and market_price = ?", QTY, PRICE).Order("created_at ASC").Limit(LIMIT).Scan(&msg)
+				fmt.Println("entro en tras", msg)
+				messagetr <- msg
 			}
-
 		} else {
 			wsClientr.Close()
 		}
+
+	} else {
+		wsClientr.Close()
 	}
 
 }

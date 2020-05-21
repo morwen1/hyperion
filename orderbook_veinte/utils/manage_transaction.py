@@ -20,7 +20,6 @@ class TransactionsManger :
         status_orders = OrderStatus.objects.all()
 
         #verificacion de los lados de la transaccion
-        print(self.side1)
         if self.side1['side'] == 'ask':
             
             seller = Orders.objects.get( orderId = int(self.side1['orderId']))

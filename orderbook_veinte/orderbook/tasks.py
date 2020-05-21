@@ -1,4 +1,4 @@
-
+import time
 
 #celery
 from celery.decorators import task 
@@ -41,7 +41,7 @@ def AsincronicOrderProces (order , side , price , qty ):
 
 
 #Transaction
-@task(name="processingTransaction")
+@task(name="processingTransaction" )
 def Transaction(transaction):
     #tru = transaction unit
     #trm = transaction manager
@@ -51,9 +51,11 @@ def Transaction(transaction):
 
         qty = tru['qty']
         price = tru['price']
-        
+        time
         trm = TransactionsManger(side1 , side2 ,qty , price )
+        
         trm.saving_transactions()
+       
     
 
 

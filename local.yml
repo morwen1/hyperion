@@ -60,6 +60,8 @@ services:
     ports : 
       - "6379:6379"
 
+  
+
   celeryworker:
     <<: *django
     image: orderbook_veinte_local_celeryworker
