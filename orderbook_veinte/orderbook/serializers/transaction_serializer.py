@@ -5,5 +5,5 @@ from orderbook_veinte.orderbook.models import Transactions
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transactions
-        fields= ['qty' , 'price','type_transaction']
+        fields= ['id','qty' , 'price','type_transaction']
 
