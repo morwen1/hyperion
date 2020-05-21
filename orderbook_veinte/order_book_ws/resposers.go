@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/jinzhu/gorm"
+)
+
 type Order struct {
 	OrderId   string `json:"orderId"`
 	Qty       string `json:"qty"`
@@ -10,8 +14,9 @@ type Order struct {
 }
 
 type Transaction struct {
-	Price string `json:"price"`
-	Qty   string `json:"qty"`
+	gorm.Model
+	Price string `json:"price" ; gorm:type:integer`
+	Qty   string `json:"qty"; gorm:type:double`
 }
 type Responses struct {
 	LastTransaction Transaction `json:"lastTransaction"`
