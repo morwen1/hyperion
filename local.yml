@@ -24,7 +24,7 @@ services:
 
   
   
-  golang:
+  orderbookws:
     build : 
       context: . 
       dockerfile: ./compose/local/golang/Dockerfile

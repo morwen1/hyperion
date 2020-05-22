@@ -328,7 +328,6 @@ REDIS = {
 }
 
 CORS_ORIGIN_WHITELIST = (
-    'google.com',
     'veinte.net',
-    'localhost'
+    'localhost',
 )

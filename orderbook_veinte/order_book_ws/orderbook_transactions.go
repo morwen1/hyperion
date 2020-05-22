@@ -18,9 +18,10 @@ var upgradertr = websocket.Upgrader{
 }
 
 type trModel struct {
-	qty              int
-	price            float64
-	type_transaction string
+	Id              int     `json:id`
+	Qty             int     `json:qty`
+	Price           float64 `json:price`
+	TypeTransaction string  `json:type_transaction`
 }
 
 var messagetr = make(chan trModel)
@@ -44,7 +45,7 @@ func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	var QTY = vars["qty"]
 	var PRICE = vars["price"]
-	var LIMIT = vars["limit"]
+	//var LIMIT, _ = strconv.Atoi(vars["limit"])
 
 	client := PsqlClient()
 	ws, err := upgradertr.Upgrade(w, r, nil)
@@ -58,9 +59,18 @@ func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
 			for {
 				var msg trModel
 				//consulta de sql formada con gorm trae todo lo que esta en la tabla limitando por cant y ordenada de mayor a menro con el crated_at
-				client.Table("orderbook_transactions").Select(" qty , price , type_transaction").Where("market_qty = ? and market_price = ?", QTY, PRICE).Order("created_at ASC").Limit(LIMIT).Scan(&msg)
-				fmt.Println("entro en tras", msg)
+				rows, err := client.Raw("select id , qty ,price  , type_transaction from orderbook_transactions where market_qty='BTC'  and market_price='USD' limit 10 ;").Rows()
+				if err != nil {
+					log.Panic("Row error")
+				}
+
+				for rows.Next() {
+					rows.Scan(&msg.Id, &msg.Qty, &msg.Price, &msg.TypeTransaction)
+					fmt.Println("entro en rows", msg)
+
+				}
 				messagetr <- msg
+
 			}
 		} else {
 			wsClientr.Close()
