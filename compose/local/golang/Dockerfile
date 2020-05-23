@@ -3,6 +3,7 @@ from golang:latest
 
 WORKDIR /go/src/app
 
+ENV PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
 
 COPY ./orderbook_veinte/order_book_ws/ .
@@ -10,7 +11,7 @@ COPY ./orderbook_veinte/order_book_ws/ .
 RUN pwd
 
 RUN go get -d -v ./...
-RUN go install -v ./...
+#RUN go install -v ./...
 
 
 #RUN go get -u -v -f all  
