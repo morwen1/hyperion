@@ -327,7 +327,4 @@ REDIS = {
     'url' : env("REDIS_URL_TREE") , 
 }
 
-CORS_ORIGIN_WHITELIST = (
-    'veinte.net',
-    'localhost',
-)
+CORS_ORIGIN_ALLOW_ALL = True
