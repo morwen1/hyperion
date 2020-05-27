@@ -47,6 +47,7 @@ func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	var QTY = vars["qty"]
 	var PRICE = vars["price"]
+	//var LIMIT = vars["limit"]
 	//var LIMIT, _ = strconv.Atoi(vars["limit"])
 	redClient := GetRedisClient()
 	keys := redClient.GenaratorKeys(PRICE, QTY)
