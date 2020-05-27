@@ -1,0 +1,88 @@
+version: '3'
+
+volumes:
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: orderbook_veinte_local_django
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    ports:
+      - "8000:8030"
+    command: /start
+
+  
+  
+  golang:
+    build : 
+      context: . 
+      dockerfile: ./compose/local/golang/Dockerfile
+    image: orderbook_veinte_local_golang
+    depends_on:
+      - django
+      - redis 
+    volumes : 
+      - ./orderbook_veinte/order_book_ws/:/go/src/app
+    working_dir: /go/src/app
+    ports:
+      - "8001:8032"
+    command: go run .
+
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: orderbook_veinte_production_postgres
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
+   
+
+
+  redis:
+    image: redis:5.0
+
+
+  
+
+  celeryworker:
+    <<: *django
+    image: orderbook_veinte_local_celeryworker
+    depends_on:
+      - django
+      - redis
+      - postgres
+    ports: []
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *django
+    image: orderbook_veinte_local_celerybeat
+    depends_on:
+      - django
+      - redis
+      - postgres
+      
+    ports: []
+    command: /start-celerybeat
+
+  flower:
+    <<: *django
+    image: orderbook_veinte_local_flower
+    ports:
+      - "5555:8031"
+    command: /start-flower

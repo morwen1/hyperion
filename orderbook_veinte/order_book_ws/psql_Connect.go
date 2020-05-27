@@ -1,4 +1,4 @@
-/*package main
+package main
 
 import (
 	"log"
@@ -15,5 +15,3 @@ func PsqlClient() *gorm.DB {
 	}
 	return client
 }
-*/
-package main

@@ -74,7 +74,6 @@ func (red *RedisClient) GetPrices(orientation string, side string, keys map[stri
 
 func (red *RedisClient) GetLastTransaction(keys map[string]string) Transaction {
 	var tr Transaction
-	log.Println(keys)
 	qry, _ := red.HGetAll(keys["KEY_TRANSACTION"]).Result()
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &tr, WeaklyTypedInput: true})
 

@@ -21,10 +21,20 @@ class TransactionViewset(
         return super(TransactionViewset , self).dispatch(request , *args , **kwargs)
 
 
+    
 
     def get_queryset(self) :
 
-        qry = Transactions.objects.filter(Q(market_qty = self.qty ) & Q(market_price = self.price)).order_by("-created_at")[:10]
+        qry = Transactions.objects.filter(Q(market_qty = self.qty ) & 
+        Q(market_price = self.price)).order_by("-created_at")[:10]
+
+        if self.action == 'retrieve':
+            qry = Transactions.objects.filter(
+                Q(buyer__TraderId=lookup_field) | Q(seller__TraderId=lookup_field) 
+                 & Q(market_qty = self.qty ) & Q(market_price = self.price)
+                ).order_by("-created_at")[:10]
+
+
         return qry
     permission_classes = [AllowAny , ]
     serializer_class = TransactionSerializer

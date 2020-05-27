@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -24,7 +24,9 @@ type trModel struct {
 	TypeTransaction string  `json:type_transaction`
 }
 
-var messagetr = make(chan trModel)
+var items []trModel
+
+var messagetr = make(chan []trModel)
 var wsClientr *websocket.Conn
 
 func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
@@ -46,30 +48,41 @@ func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
 	var QTY = vars["qty"]
 	var PRICE = vars["price"]
 	//var LIMIT, _ = strconv.Atoi(vars["limit"])
+	redClient := GetRedisClient()
+	keys := redClient.GenaratorKeys(PRICE, QTY)
 
 	client := PsqlClient()
-	ws, err := upgradertr.Upgrade(w, r, nil)
+	wstr, err := upgradertr.Upgrade(w, r, nil)
 	if err != nil {
 		log.Panic("bad request")
 
 	}
-	wsClientr = ws
+	wsClientr = wstr
+	c_tr := ""
 	if QTY != PRICE {
+
 		if (InBool(cripto, QTY) || InBool(fiat, QTY)) && (InBool(cripto, PRICE) || InBool(fiat, PRICE)) {
 			for {
-				var msg trModel
-				//consulta de sql formada con gorm trae todo lo que esta en la tabla limitando por cant y ordenada de mayor a menro con el crated_at
-				rows, err := client.Raw("select id , qty ,price  , type_transaction from orderbook_transactions where market_qty='BTC'  and market_price='USD' limit 10 ;").Rows()
-				if err != nil {
-					log.Panic("Row error")
-				}
+				counterTransactions := redClient.Get(keys["COUNTER_TRANSACTION"]).Val()
+				if c_tr != counterTransactions {
+					var msg trModel
+					//consulta de sql formada con gorm trae todo lo que esta en la tabla limitando por cant y ordenada de mayor a menro con el crated_at
+					rows, err := client.Raw("SELECT id , qty ,price  , type_transaction FROM orderbook_transactions WHERE market_qty='" + QTY + "' and market_price='" + PRICE + "' ORDER BY created_at DESC LIMIT 10 ;").Rows()
+					if err != nil {
 
-				for rows.Next() {
-					rows.Scan(&msg.Id, &msg.Qty, &msg.Price, &msg.TypeTransaction)
-					fmt.Println("entro en rows", msg)
+						log.Panic("Row error")
+					}
+
+					for rows.Next() {
+						rows.Scan(&msg.Id, &msg.Qty, &msg.Price, &msg.TypeTransaction)
+						items = append(items, msg)
+					}
+					log.Println("new Transactions")
+					c_tr = redClient.Get(keys["COUNTER_TRANSACTION"]).Val()
+					messagetr <- items
 
 				}
-				messagetr <- msg
+				time.Sleep(100 * time.Millisecond) // descanso de las peticiones
 
 			}
 		} else {
@@ -81,8 +94,10 @@ func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func HandleMessageTransactions() {
+func HandleMessageTransaction() {
+
 	for {
+
 		msg := <-messagetr
 		err := wsClientr.WriteJSON(msg)
 		if err != nil {

@@ -52,13 +52,13 @@ func OrderBook(w http.ResponseWriter, r *http.Request) {
 	if QTY != PRICE {
 		if (InBool(cripto, QTY) || InBool(fiat, QTY)) && (InBool(cripto, PRICE) || InBool(fiat, PRICE)) {
 			counter := len(client.Keys("quote*").Val())
-			counter_transactions := client.Get(keys["KEY_TRANSACTION"]).Val()
+			counter_transactions := ""
 			for {
 				var msg Responses
 				time.Sleep(100 * time.Millisecond) // descanso de las peticiones
 
 				c := len(client.Keys("quote*").Val())
-				c_tr := client.Get(keys["KEY_TRANSACTION"]).Val()
+				c_tr := client.Get(keys["COUNTER_TRANSACTION"]).Val()
 				if c != counter || c_tr != counter_transactions { //validacion de las llaves que hay en redis
 
 					bids := client.GetQuotes(true, 100, "bid", keys)
@@ -73,7 +73,7 @@ func OrderBook(w http.ResponseWriter, r *http.Request) {
 
 					message <- msg
 					counter = len(client.Keys("quote*").Val())
-					counter_transactions = client.Get(keys["KEY_TRANSACTION"]).Val()
+					counter_transactions = client.Get(keys["COUNTER_TRANSACTION"]).Val()
 
 					log.Println("change message...  ", counter)
 				}
@@ -87,8 +87,10 @@ func OrderBook(w http.ResponseWriter, r *http.Request) {
 		wsClient.Close()
 	}
 }
-func HandleMessage() {
+func HandleMessageMarket() {
+
 	for {
+
 		msg := <-message
 		err := wsClient.WriteJSON(msg)
 		if err != nil {

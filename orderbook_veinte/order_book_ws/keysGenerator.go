@@ -19,6 +19,7 @@ func (red *RedisClient) GenaratorKeys(price string, qty string) map[string]strin
 	keys["KEY_TEMPLATE_QUOTE"] = fmt.Sprint("quote-", qty, "-", price, "-")
 	keys["KEY_TEMPLATE_PRICE_QUOTES"] = fmt.Sprint("-", qty, "-", price, "-")
 	keys["KEY_TRANSACTION"] = fmt.Sprint("transactions-", qty, "-", price)
+	keys["COUNTER_TRANSACTION"] = fmt.Sprint("transactions-counter-", qty, "-", price)
 	return keys
 
 }

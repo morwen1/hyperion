@@ -10,7 +10,8 @@ func main() {
 	server := Server(r, "0.0.0.0:8001")
 	go server.ListenAndServe()
 	log.Println("running server....")
-	go HandleMessage()
+	go HandleMessageMarket()
+	go HandleMessageTransaction()
 	logsCmd := "listening"
 	for {
 		log.Println(logsCmd)
