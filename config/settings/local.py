@@ -11,7 +11,11 @@ SECRET_KEY = env(
     default="KUT8zHYfPnC5lX6EpQSZjGkWIT0CPR6vT6GSZnTh3j4h09FHkKwqj4RQYCr5g6Th",
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "localhost", "0.0.0.0", "127.0.0.1" 
+    ,"0.0.0.0:3000", "127.0.0.1:3000",
+    "veinte.net:3000"  
+    ]
 
 
 # EMAIL
