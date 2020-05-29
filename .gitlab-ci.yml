@@ -25,7 +25,7 @@ making_containers:
   only:
     - develop
   tags :
-    - veinte_banks_staging
+    - orderbookstg
 
 run_containers : 
   stage : run 
