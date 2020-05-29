@@ -19,7 +19,7 @@ services:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
     ports:
-      - "8000:8000"
+      - "8000:8030"
     command: /start
 
   
@@ -36,7 +36,7 @@ services:
       - ./orderbook_veinte/order_book_ws/:/go/src/app
     working_dir: /go/src/app
     ports:
-      - "8001:8001"
+      - "8001:8031"
     command: go run .
 
 
@@ -87,5 +87,5 @@ services:
     <<: *django
     image: orderbook_veinte_local_flower
     ports:
-      - "5555:5555"
+      - "5555:5556"
     command: /start-flower
