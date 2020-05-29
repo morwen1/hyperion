@@ -37,7 +37,7 @@ class CreateBids(
 
 
     def get_serializer_class(self):
-        
+        serializer = BidsSerializers
         if self.action == 'list' or  self.action == 'create':
             serializer = BidsSerializers
         elif self.action == 'update' : 

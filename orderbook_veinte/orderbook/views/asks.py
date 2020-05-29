@@ -39,9 +39,10 @@ class CreateAsks(
         }
 
     def get_serializer_class(self):
-        
+        serializer = AsksSerializers
         if self.action == 'list' or  self.action == 'create':
             serializer = AsksSerializers
         elif self.action == 'update' : 
             serializer = UpdateAskSerializer
+    
         return serializer
