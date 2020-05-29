@@ -19,7 +19,7 @@ services:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
     ports:
-      - "8000:8030"
+      - "8000:8020"
     command: /start
 
   
@@ -36,7 +36,7 @@ services:
       - ./orderbook_veinte/order_book_ws/:/go/src/app
     working_dir: /go/src/app
     ports:
-      - "8001:8031"
+      - "8001:8021"
     command: go run .
 
 
@@ -51,7 +51,7 @@ services:
     env_file:
       - ./.envs/.local/.postgres
     ports:
-      - "5432:5432"
+      - "5432:5434"
 
 
 
