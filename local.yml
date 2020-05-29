@@ -87,5 +87,5 @@ services:
     <<: *django
     image: orderbook_veinte_local_flower
     ports:
-      - "5556:5555"
+      - "5557:5555"
     command: /start-flower
