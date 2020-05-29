@@ -18,9 +18,9 @@ making_containers:
   stage: make_containers
   script :
     - sudo docker system prune -f
-    - sudo docker-compose -f staging.yml build --no-cache
-    - sudo docker-compose -f staging.yml up -d 
-    - sudo docker-compose -f staging.yml logs  
+    - sudo docker-compose -f local.yml build --no-cache
+    - sudo docker-compose -f local.yml up -d 
+    - sudo docker-compose -f local.yml logs  
   
   only:
     - develop
