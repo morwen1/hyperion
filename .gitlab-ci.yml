@@ -1,0 +1,37 @@
+
+
+stages : 
+    - make_containers
+    - run
+  
+  
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+  
+  
+  before_script : 
+    - sudo apt-get update -y && sudo apt-get upgrade -y 
+    - sudo apt-get install docker -y  && sudo apt-get install docker-compose -y   
+  
+  making_containers:
+    stage: make_containers
+    script :
+      - sudo docker system prune -f
+      - sudo docker-compose -f local.yml build --no-cache
+      - sudo docker-compose -f local.yml up -d 
+      - sudo docker-compose -f local.yml logs  
+    
+    only:
+      - develop
+    tags :
+      - orderbookstg
+  
+  run_containers : 
+    stage : run 
+    script : 
+      - docker-compose -f production.yml up -d 
+    only:
+      - master
+  
+      

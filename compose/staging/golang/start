@@ -1,0 +1,10 @@
+#!/bin/bash
+
+
+
+#
+#ls
+#pwd
+go build .
+#go run .
+./app

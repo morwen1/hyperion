@@ -1,0 +1,84 @@
+log:
+  level: INFO
+
+entryPoints:
+  web:
+    # http
+    address: ":8030"
+
+  web-secure:
+    # https
+    address: ":443"
+
+  sockets:
+    address: ":8031"
+
+certificatesResolvers:
+  letsencrypt:
+    # https://docs.traefik.io/master/https/acme/#lets-encrypt
+    acme:
+      email: "morwen901@gmail.com"
+      storage: /etc/traefik/acme/acme.json
+      # https://docs.traefik.io/master/https/acme/#httpchallenge
+      httpChallenge:
+        entryPoint: web
+
+http:
+  routers:
+    web-router:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - web
+      middlewares:
+        - redirect
+        - csrf
+      service: django
+
+    web-secure-router:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - web-secure
+      middlewares:
+        - csrf
+      service: django
+      tls:
+        # https://docs.traefik.io/master/routing/routers/#certresolver
+        certResolver: letsencrypt
+
+    flower-secure-router:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - flower
+      service: flower
+      tls:
+        # https://docs.traefik.io/master/routing/routers/#certresolver
+        certResolver: letsencrypt
+
+  middlewares:
+    redirect:
+      # https://docs.traefik.io/master/middlewares/redirectscheme/
+      redirectScheme:
+        scheme: http
+        permanent: false
+    csrf:
+      # https://docs.traefik.io/master/middlewares/headers/#hostsproxyheaders
+      # https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+      headers:
+        hostsProxyHeaders: ["X-CSRFToken"]
+
+  services:
+    django:
+      loadBalancer:
+        servers:
+          - url: http://django:5000
+
+    flower:
+      loadBalancer:
+        servers:
+          - url: http://flower:5555
+
+providers:
+  # https://docs.traefik.io/master/providers/file/
+  file:
+    filename: /etc/traefik/traefik.yml
+    watch: true

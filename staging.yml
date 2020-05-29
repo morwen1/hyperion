@@ -1,14 +1,32 @@
 version: '3'
 
 volumes:
-  local_postgres_data: {}
-  local_postgres_data_backups: {}
+  staging_postgres_data: {}
+  staging_postgres_data_backups: {}
+  staging_traefik: {}
 
 services:
+
+
+  traefik:
+    build:
+      context: .
+      dockerfile: ./compose/staging/traefik/Dockerfile
+    image: orderbook_veinte_staging_traefik
+    depends_on:
+      - django
+    volumes:
+      - staging_traefik:/etc/traefik/acme
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+
+      
+      
   django: &django
     build:
       context: .
-      dockerfile: ./compose/local/django/Dockerfile
+      dockerfile: ./compose/staging/django/Dockerfile
     image: orderbook_veinte_local_django
     depends_on:
       - postgres
@@ -16,18 +34,16 @@ services:
     volumes:
       - .:/app
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    ports:
-      - "8000:8030"
+      - ./.envs/.staging/.django
+      - ./.envs/.staging/.postgres
+    
     command: /start
 
-  
-  
+
   golang:
     build : 
       context: . 
-      dockerfile: ./compose/local/golang/Dockerfile
+      dockerfile: ./compose/staging/golang/Dockerfile
     image: orderbook_veinte_local_golang
     depends_on:
       - django
@@ -35,8 +51,7 @@ services:
     volumes : 
       - ./orderbook_veinte/order_book_ws/:/go/src/app
     working_dir: /go/src/app
-    ports:
-      - "8001:8032"
+   
     command: go run .
 
 
@@ -46,10 +61,10 @@ services:
       dockerfile: ./compose/production/postgres/Dockerfile
     image: orderbook_veinte_production_postgres
     volumes:
-      - local_postgres_data:/var/lib/postgresql/data
-      - local_postgres_data_backups:/backups
+      - staging_postgres_data:/var/lib/postgresql/data
+      - staging_postgres_data:/backups
     env_file:
-      - ./.envs/.local/.postgres
+      - ./.envs/.staging/.postgres
    
 
 

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+
+python manage.py loaddata orderbook_veinte/utils/seeders/order_status.json
