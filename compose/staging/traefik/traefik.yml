@@ -4,14 +4,13 @@ log:
 entryPoints:
   web:
     # http
-    address: ":8030"
+    address: ":80"
 
   web-secure:
     # https
     address: ":443"
 
-  sockets:
-    address: ":8031"
+
 
 certificatesResolvers:
   letsencrypt:
@@ -70,15 +69,14 @@ http:
     django:
       loadBalancer:
         servers:
-          - url: http://django:5000
+          - url: http://django:8000
 
     flower:
       loadBalancer:
         servers:
           - url: http://flower:5555
 
-providers:
-  # https://docs.traefik.io/master/providers/file/
-  file:
-    filename: /etc/traefik/traefik.yml
-    watch: true
+  providers:
+    docker:
+      endpoint: "unix:///var/run/docker.sock"
+      watch: true

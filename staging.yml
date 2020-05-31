@@ -20,8 +20,9 @@ services:
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
+    
 
-      
+       
       
   django: &django
     build:
@@ -98,6 +99,4 @@ services:
   flower:
     <<: *django
     image: orderbook_veinte_local_flower
-    ports:
-      - "5555:8031"
     command: /start-flower
