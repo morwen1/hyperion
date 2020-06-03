@@ -13,6 +13,7 @@ type Transaction struct {
 	Price string `json:"price" ; gorm:type:integer`
 	Qty   string `json:"qty"; gorm:type:double`
 }
+
 type Responses struct {
 	LastTransaction Transaction `json:"lastTransaction"`
 	MaxPriceBid     string      `json:"maxPriceBid"`

@@ -13,13 +13,17 @@ from orderbook_veinte.orderbook.tasks import AsincronicOrderProces
 class AsksSerializers(serializers.ModelSerializer):
     class Meta : 
         model = Orders
-        fields = ('traderId','timestamp' , 'qty' , 'price')
+        fields = ('timestamp' , 'qty' , 'price')
     def create(self , validated_data):
+        user = self.context['request'].user
+        traderId = user.trader_id
+        validated_data['traderId']=traderId
         ask = Ask(**validated_data  )
         AsincronicOrderProces.delay(order=ask.__dict__ , side ='ask', qty= self.context['qty'], price= self.context['price'] )
 
 
         order = Orders.objects.create(
+    
                 Ask = True , 
                 market_qty= self.context['qty'],
                 market_price =self.context['price'],

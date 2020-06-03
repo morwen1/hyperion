@@ -1,15 +1,18 @@
 #Rest framework
 from rest_framework.generics import mixins 
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.permissions import AllowAny
 #models 
-
-
 
 from orderbook_veinte.orderbook.models.Order import Orders
 
 #serializers
 from orderbook_veinte.orderbook.serializers import AsksSerializers ,UpdateAskSerializer
+
+#permissions 
+from orderbook_veinte.utils.permissions import LazyAuthenticated
+from rest_framework.permissions import AllowAny , IsAuthenticatedOrReadOnly
+
+
 
 class CreateAsks( 
     GenericViewSet,  
@@ -18,12 +21,27 @@ class CreateAsks(
     mixins.UpdateModelMixin):
 
             
+    def get_permissions (self):
+        permission = []
+        if self.action in ['list','retrieve'] : 
+            permision =  [AllowAny ,  IsAuthenticatedOrReadOnly ]
+        elif self.action in[ 'create' , 'partial' , 'update']:
+            permision = [LazyAuthenticated, ]
+        
+        return [p() for p in permision]
 
-    queryset = Orders.objects.filter(Ask=True)
-    permission_classes = [AllowAny , ]
+    def get_queryset(self):
+        queryset = Orders.objects.filter(Ask=True)
+        if self.action == "list":
+            queryset = Orders.objects.filter(Ask=True).order_by("-created_at")[:10]
+
+    
+        return queryset
 
 
-    def dispatch(self , request ,*args , **kwargs):
+
+    def dispatch(self , request ,*args , **kwargs):    
+
         self.qty_orderbook = kwargs['qty']
         self.price_orderbook = kwargs['price'] 
         return super(CreateAsks , self).dispatch(request , *args , **kwargs)
@@ -32,6 +50,7 @@ class CreateAsks(
     def get_serializer_context(self):
         return{
             'request': self.request,
+
             'format': self.format_kwarg,
             'view': self,
             'qty': self.qty_orderbook,

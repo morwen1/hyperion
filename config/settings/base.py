@@ -132,7 +132,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.common.BrokenLinkEmailsMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "orderbook_veinte.utils.markets_middleware.MarketMiddleware",
+    "orderbook_veinte.utils.middlewares.MarketMiddleware",
+    "orderbook_veinte.utils.middlewares.JwtMiddleware",
+
 
 ]
 
@@ -295,13 +297,17 @@ SOCIALACCOUNT_ADAPTER = "orderbook_veinte.users.adapters.SocialAccountAdapter"
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
+        #"rest_framework.authentication.SessionAuthentication",
+        #"rest_framework.authentication.TokenAuthentication",
     ),
      'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PERMISSION_CLASSES": (
+        #"rest_framework_simplejwt.authentication.JWTAuthentication",
+        #"rest_framework.permissions.IsAuthenticated",
+        "orderbook_veinte.utils.permissions.LazyAuthenticated"
+        ),
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
@@ -326,3 +332,7 @@ REDIS = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+
+
+

@@ -27,5 +27,6 @@ class Transactions (AbOrderbook):
     type_transaction = models.CharField(choices=choices , max_length = 120)
     qty = models.IntegerField()
     price = models.FloatField()
+    qty_total = models.IntegerField()
     market_qty = models.CharField(max_length = 255)
     market_price = models.CharField(max_length = 255)

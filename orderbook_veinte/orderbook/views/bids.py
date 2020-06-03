@@ -1,12 +1,18 @@
 #Rest framework
 from rest_framework.generics import mixins 
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.permissions import AllowAny
+
 #models 
 from orderbook_veinte.orderbook.models.Order import Orders
 
 #serializers
 from orderbook_veinte.orderbook.serializers import BidsSerializers ,UpdateBidSerializer
+
+#permissions 
+from orderbook_veinte.utils.permissions import LazyAuthenticated
+from rest_framework.permissions import AllowAny , IsAuthenticatedOrReadOnly
+
+
 
 class CreateBids( 
     GenericViewSet,
@@ -15,11 +21,27 @@ class CreateBids(
     mixins.UpdateModelMixin):
 
             
+    def get_permissions (self):
+        permission = []
+        if self.action in ['list','retrieve'] : 
+            permision =  [AllowAny ,  IsAuthenticatedOrReadOnly ]
+        elif self.action in[ 'create' , 'partial' , 'update']:
+            permision = [LazyAuthenticated, ]
+        
+        return [p() for p in permision]
 
-    queryset = Orders.objects.filter(Bid=True)
-    permission_classes = [AllowAny , ]
+    
+
+
+    def get_queryset(self):
+        queryset = Orders.objects.filter(Bid=True)
+        if self.action == "list":
+            queryset = Orders.objects.filter(Bid=True).order_by("-created_at")[:10]
+
+        return queryset
 
     def dispatch(self , request ,*args , **kwargs):
+        #import pdb; pdb.set_trace()
         self.qty_orderbook = kwargs['qty']
         self.price_orderbook = kwargs['price'] 
         return super(CreateBids , self).dispatch(request , *args , **kwargs)

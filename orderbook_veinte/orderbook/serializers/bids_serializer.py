@@ -3,6 +3,7 @@
 #REST FRAMEWORK
 from rest_framework import serializers
 
+
 #MODELS 
 
 from orderbook_veinte.orderbook.models import Orders
@@ -17,8 +18,14 @@ from orderbook_veinte.orderbook.tasks import AsincronicOrderProces
 class BidsSerializers(serializers.ModelSerializer):
     class Meta : 
         model = Orders
-        fields = ('traderId','timestamp' , 'qty' , 'price')
+        fields = ('timestamp' , 'qty' , 'price')
     def create(self , validated_data):
+        
+        
+        user = self.context['request'].user
+        traderId = user.trader_id
+        validated_data['traderId']=traderId
+
 
         bid = Bid(**validated_data  )
         #se activa la tarea de procesar orden

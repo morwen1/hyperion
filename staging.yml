@@ -15,8 +15,11 @@ services:
     image: orderbook_veinte_staging_traefik
     depends_on:
       - django
+      - flower
+      - golang
     volumes:
       - staging_traefik:/etc/traefik/acme
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
