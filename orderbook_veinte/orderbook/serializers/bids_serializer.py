@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 #MODELS 
 
-from orderbook_veinte.orderbook.models import Orders
+from orderbook_veinte.orderbook.models import Orders , OrderStatus
 #Orerbook
 from orderbook_veinte.orderbook.tree import initializeTree
 from orderbook_veinte.orderbook.tree import Bid
@@ -21,7 +21,8 @@ class BidsSerializers(serializers.ModelSerializer):
         fields = ('timestamp' , 'qty' , 'price')
     def create(self , validated_data):
         
-        
+        status = OrderStatus.objects.get(status = 'open')
+
         user = self.context['request'].user
         traderId = user.trader_id
         validated_data['traderId']=traderId
@@ -38,23 +39,20 @@ class BidsSerializers(serializers.ModelSerializer):
 
         existence_order =False#Orders.objects.filter(**validated_data , Bid=True).exists()
 
-        if  existence_order == False:
-            order = Orders.objects.create(
-                Bid = True , 
-                market_qty= self.context['qty'],
-                market_price =self.context['price'],
-                Ask = False,
-                **validated_data
+        order = Orders.objects.create(
+            status =status,
+            Bid = True , 
+            market_qty= self.context['qty'],
+            market_price =self.context['price'],
+            Ask = False,
+            close_qty = validated_data['qty'],
+            **validated_data
             )
             #if order.orderId != bid.orderId:
             #    order.orderId = bid.orderId
 
-            order.save()
-        else: 
-            order = Orders.objects.get(**validated_data , Bid=True)
-            raise serializers.ValidationError(f'order {order.orderId} exists :c ' )
-
-
+        order.save()
+       
         return order   
 
 

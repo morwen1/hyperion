@@ -4,6 +4,7 @@ from rest_framework.viewsets import GenericViewSet
 #models 
 
 from orderbook_veinte.orderbook.models.Order import Orders
+from django.db.models import Q
 
 #serializers
 from orderbook_veinte.orderbook.serializers import AsksSerializers ,UpdateAskSerializer
@@ -23,18 +24,18 @@ class CreateAsks(
             
     def get_permissions (self):
         permission = []
-        if self.action in ['list','retrieve'] : 
-            permision =  [AllowAny ,  IsAuthenticatedOrReadOnly ]
-        elif self.action in[ 'create' , 'partial' , 'update']:
-            permision = [LazyAuthenticated, ]
+
+        if self.action in ['list'] : 
+            permission =  [AllowAny , ]
+        elif self.action in [ 'create' , 'partial' , 'update' ]:
+            permission = [LazyAuthenticated, ]
         
-        return [p() for p in permision]
+        return [p() for p in permission]
 
     def get_queryset(self):
         queryset = Orders.objects.filter(Ask=True)
         if self.action == "list":
             queryset = Orders.objects.filter(Ask=True).order_by("-created_at")[:10]
-
     
         return queryset
 

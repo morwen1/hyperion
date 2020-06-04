@@ -18,47 +18,59 @@ class TransactionsManger :
         self.side2 = side2 
         self.qty = qty 
         self.price = price 
-    
+
+        
     def saving_transactions (self):
         status_orders = OrderStatus.objects.all()
-
         #verificacion de los lados de la transaccion
         if self.side1['side'] == 'ask':
             
             seller = Orders.objects.get( orderId = int(self.side1['orderId']))
-            seller.close_qty = int(self.side1['qty'])
+            seller.close_qty = int( seller.qty  -  self.qty)
             buyer =Orders.objects.get( orderId = int(self.side2['orderId']))
-            buyer.close_qty = int(self.side2['qty'])
+            buyer.close_qty = int( buyer.qty  -  self.qty)
+
 
 
         elif self.side1['side'] == 'bid':
             buyer = Orders.objects.get( orderId = int(self.side1['orderId']))
-            buyer.close_qty = int(self.side1['qty'])
-            seller =Orders.objects.get( orderId = int(self.side2['orderId']))
-            seller.close_qty = int(self.side2['qty'])
+            buyer.close_qty = int( buyer.qty  -  self.qty)
 
+            buyer.save()
+            seller =Orders.objects.get( orderId = int(self.side2['orderId']))
+            seller.close_qty = int( seller.qty  -  self.qty)
+            seller.save()
+
+        #  WARNING celery tiene problemas con orm aveces 
         #validacion de los tipos de transacciones y los estados de las ordenes
-        if self.qty < seller.close_qty  :
+        if seller.close_qty != 0 :
             transaction_type = 'partial'
             seller.status=status_orders.get(status = 'open')
-        elif self.qty < buyer.close_qty : 
+            seller.save()
+
+        if buyer.close_qty != 0 : 
             transaction_type = 'partial'
             buyer.status = status_orders.get(status='open')
-        elif self.qty > seller.close_qty  :
-            transaction_type = 'partial'
-            seller.status=status_orders.get(status = 'completed')
-        elif self.qty > buyer.close_qty : 
-            transaction_type = 'partial'
-            buyer.status = status_orders.get(status='close')
-    
-        elif self.qty > buyer.close_qty and self.qty > buyer.close_qty : 
-            transaction_type = 'complete'
-            buyer.status = status_orders.get(status='close')
-            seller.status=status_orders.get(status = 'completed')
+            buyer.save()
 
+        if seller.close_qty == 0  :
+            transaction_type = 'partial'
+            seller.status=status_orders.get(status = 'completed')
+            seller.save()
+
+        if buyer.close_qty == 0 : 
+            transaction_type = 'partial'
+            buyer.status = status_orders.get(status = 'completed')
+            buyer.save()
+
+        if buyer.close_qty == 0 and  buyer.close_qty == 0 : 
+            transaction_type = 'complete'
+            buyer.status = status_orders.get(status = 'completed')
+            seller.status=status_orders.get(status = 'completed')
+            buyer.save()
+            seller.save()
         
-        else : 
-            raise "transaction qty is not valid"
+        
 
     
         transaction = Transactions.objects.create(

@@ -1,11 +1,12 @@
 import jwt 
-
+from config.settings.base import env
 from orderbook_veinte.orderbook.models import AbstractTrader
-
+from django.http import HttpResponseForbidden
 class JwtMiddleware:
     def __init__ (self , get_response):
         self.get_response = get_response 
-    
+        self.env = env
+
     
 
 
@@ -13,12 +14,16 @@ class JwtMiddleware:
         headers = request.headers 
         if 'Authorization' in headers :
             token = headers['Authorization']
-
+            sig_key = self.env("SIG_KEY")
             token = token.replace("Bearer " , '' )
-            decoded_token  = jwt.decode(token , algorithms= ['HS256'],verify=False )
-            user = AbstractTrader()
-            user.trader_id = decoded_token['id']
-            request.user = user
+            try:
+                decoded_token  = jwt.decode(token , sig_key, algorithms= ['HS256'] )
+            except Exception as e :
+                return HttpResponseForbidden( f"(e.e)  {e} ")
+
+            
+           
+           
         #import pdb; pdb.set_trace()
 
         return self.get_response(request)
