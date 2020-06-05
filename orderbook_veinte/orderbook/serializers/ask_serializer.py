@@ -13,7 +13,7 @@ from orderbook_veinte.orderbook.tasks import AsincronicOrderProces
 class AsksSerializers(serializers.ModelSerializer):
     class Meta : 
         model = Orders
-        fields = ('timestamp' , 'qty' , 'price')
+        fields = ( 'qty' , 'price')
     def create(self , validated_data):
         status = OrderStatus.objects.get(status = 'open')
 

@@ -20,7 +20,7 @@ class Trades (AbOrderbook):
     p2_orderId = models.CharField(max_length =255)
 
     def get_traders(self) : 
-        return f"{p1_traderId} , {p2_traderId}"
+        return f"{self.p1_traderId} , {self.p2_traderId}"
     
     
     def get_traders_with_side(self) :  
@@ -28,4 +28,4 @@ class Trades (AbOrderbook):
     
     
     def __str__(self):
-        return f"{p1_orderId}-{p2_orderId}"
+        return f"{self.p1_orderId}-{self.p2_orderId}"

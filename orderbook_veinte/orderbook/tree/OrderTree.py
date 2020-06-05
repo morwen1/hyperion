@@ -1,12 +1,12 @@
 import redis as red
-
+from datetime import datetime
 
 class OrderTree():
     def __init__(self,  side, baseCurrency, quoteCurrency, red):
         self.side = side
         self.red = red
-
-
+        now = datetime.now()
+        self.now = datetime.timestamp(now)
         #llaves de transacciones 
         self.TRANSACTIONS = 'transactions-%s-%s' % (baseCurrency , quoteCurrency) # acualizacion de las transacciones 
         self.TRANSACTIONS_COUNTER = f'transactions-counter-{baseCurrency}-{quoteCurrency}'
@@ -21,6 +21,7 @@ class OrderTree():
         transaction_set = {}
         transaction_set['qty'] = transaction['qty']
         transaction_set['price'] = transaction['price']
+        transaction_set['time'] = self.now
         #fixme 
         # the Ids orders
         #transaction_set['orderId1'] = transaction['party1']['orderId']
@@ -51,6 +52,7 @@ class OrderTree():
         #import pdb; pdb.set_trace()
 
         price = order.price
+        order.timestamp = self.now
         mapping = {price : price}
 
         if not self.red.exists(self.KEY_TEMPLATE_PRICE_QUOTES % price):

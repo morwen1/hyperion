@@ -278,3 +278,4 @@ orderbook_veinte/media/
 .envs/*
 !.envs/.local/
 *.sh
+.scannerwork

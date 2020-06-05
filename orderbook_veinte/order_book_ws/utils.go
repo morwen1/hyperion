@@ -11,3 +11,11 @@ func InBool(slice []string, item string) bool {
 	}
 	return r
 }
+
+/*
+
+func FormatQty(qtyBtc int32 ) string {
+
+
+
+}*/

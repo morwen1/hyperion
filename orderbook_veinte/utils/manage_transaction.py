@@ -63,7 +63,7 @@ class TransactionsManger :
             buyer.status = status_orders.get(status = 'completed')
             buyer.save()
 
-        if buyer.close_qty == 0 and  buyer.close_qty == 0 : 
+        if (seller.close_qty == 0)and ( buyer.close_qty == 0)  : 
             transaction_type = 'complete'
             buyer.status = status_orders.get(status = 'completed')
             seller.status=status_orders.get(status = 'completed')
@@ -109,13 +109,20 @@ class TransactionsManger :
 
 
 
-def manage_qty(qty , type_qty = str ):
-    unity = 10e8
-    if type_qty in ['in' , 'out'] :
-        if type_qty == 'in':
-            response = float(qty)*unity
-        elif type_qty == 'out' :
-            response =  float(qty)/unity
-        
-    return response 
+def format_output_qty (qty , type_qty : str ):
+    
+    unity1 = 1e-8
+    unity2 = 1e8
+    if qty == float :
+        return (qty + unity1) 
+
+    if type_qty == 'btc' :
+        rqty = float(qty * unity1)
+        return '{:.8f}'.format(rqty)
+    if type_qty == 'satoshi' and qty != int :
+        rqty = int(float(qty) * unity2)
+        return rqty
+
+
+
 

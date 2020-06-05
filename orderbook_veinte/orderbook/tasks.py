@@ -55,8 +55,7 @@ def Transaction(transaction):
         trm = TransactionsManger(side1 , side2 ,qty , price )
         
         trm.saving_transactions()
-       
-    
+
 
 
 

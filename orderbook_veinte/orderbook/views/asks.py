@@ -35,7 +35,7 @@ class CreateAsks(
     def get_queryset(self):
         queryset = Orders.objects.filter(Ask=True)
         if self.action == "list":
-            queryset = Orders.objects.filter(Ask=True).order_by("-created_at")[:10]
+            queryset = Orders.objects.filter(Ask=True).order_by("-price")[:10]
     
         return queryset
 

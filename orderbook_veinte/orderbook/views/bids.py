@@ -36,8 +36,7 @@ class CreateBids(
     def get_queryset(self):
         queryset = Orders.objects.filter(Bid=True)
         if self.action == "list":
-            queryset = Orders.objects.filter(Bid=True).order_by("-created_at")[:10]
-
+            queryset = Orders.objects.filter(Bid=True).order_by("price")[:10]
         return queryset
 
     def dispatch(self , request ,*args , **kwargs):

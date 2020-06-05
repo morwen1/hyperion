@@ -18,15 +18,15 @@ class MarketMiddleware:
                 "cripto": [
                     'BTC',
                     'LTC',
-                    'BSF',
                     'PTR',
                     'DSH'
                 ],
                 "fiat": [
                     "BSV",
                     "USD",
-                    "PAR",
-                    "PCH"
+                    "ARS",
+                    "CLP",
+                    "EUR",
                 ]}
             if (qty in options['cripto'] or qty in options['fiat']) and (price in options['cripto'] or price in options['fiat']) and price != qty:
                 return self.get_response(request)

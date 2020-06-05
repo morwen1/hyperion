@@ -59,7 +59,6 @@ class Order():
                         i['party1']['qty']= objprt.qty
                         i['party1']['price']  =  objprt.price 
                         i['party1']['traderId']  =objprt.traderId
-                        i['party1']['timestamp']  =objprt.timestamp
                         i['party1']['orderId']  =objprt.orderId 
 
                     tr.append(i)
