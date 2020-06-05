@@ -24,7 +24,7 @@ class CreateBids(
     def get_permissions (self):
         permission = []
         if self.action in ['list','retrieve'] : 
-            permission =  [AllowAny ,  IsAuthenticatedOrReadOnly ]
+            permission =  [AllowAny ,]
         elif self.action in[ 'create' , 'partial' , 'update']:
             permission = [LazyAuthenticated, ]
         
