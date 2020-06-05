@@ -14,6 +14,14 @@ class AsksSerializers(serializers.ModelSerializer):
     class Meta : 
         model = Orders
         fields = ( 'qty' , 'price')
+
+        
+    def to_representation(self , instance):
+        representation = super(BidsSerializers , self).to_representation(instance)
+        representation['qty'] = format_output_qty(instance.qty , type_qty='btc')
+        return representation  
+
+
     def create(self , validated_data):
         status = OrderStatus.objects.get(status = 'open')
 
@@ -22,7 +30,7 @@ class AsksSerializers(serializers.ModelSerializer):
         validated_data['traderId']=traderId
         ask = Ask(**validated_data  )
         AsincronicOrderProces.delay(order=ask.__dict__ , side ='ask', qty= self.context['qty'], price= self.context['price'] )
-
+        
 
         order = Orders.objects.create(
                 status = status,
