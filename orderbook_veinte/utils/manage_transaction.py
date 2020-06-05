@@ -63,7 +63,7 @@ class TransactionsManger :
             buyer.status = status_orders.get(status = 'completed')
             buyer.save()
 
-        if (seller.close_qty == 0)and ( buyer.close_qty == 0)  : 
+        if (seller.close_qty == 0) and ( buyer.close_qty == 0)  : 
             transaction_type = 'complete'
             buyer.status = status_orders.get(status = 'completed')
             seller.status=status_orders.get(status = 'completed')

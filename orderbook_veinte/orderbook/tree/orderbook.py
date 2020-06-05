@@ -52,6 +52,7 @@ class Order():
                     temp_id =i['party1'][2]
                     side = i['party1'][1]
                     i['party1'] = book.getOrderById(temp_id ,side )
+                    
                     if i['party1'] == {} :
                         objprt = Orders.objects.filter(orderId = temp_id).last()
 
@@ -84,7 +85,7 @@ class Order():
                         i['party2']['qty']= objprt.qty
                         i['party2']['price']  =  objprt.price 
                         i['party2']['traderId']  =objprt.traderId
-                        i['party2']['timestamp']  =objprt.timestamp
+                       # i['party2']['timestamp']  =objprt.timestamp
                         i['party2']['orderId']  =objprt.orderId 
 
                     tr.append(i)
@@ -108,43 +109,40 @@ class Order():
         trades = []
         
         for order in orderlist:
-            if priceToTrade == order.price :
-                if qtyToTrade <= 0:
-                    break
-                if qtyToTrade < order.qty:
-                    tradedQty = qtyToTrade
-                    # Amend book order
-                    newBookQty = order.qty - qtyToTrade
-                    tree.updateOrderQuatity(order.orderId, newBookQty)
-                    # Incoming done with
+            if qtyToTrade <= 0:
+                break
+            if qtyToTrade < order.qty:
+                tradedQty = qtyToTrade
+                # Amend book order
+                newBookQty = order.qty - qtyToTrade
+                tree.updateOrderQuatity(order.orderId, newBookQty)
+                # Incoming done with
+            
+                qtyToTrade = 0
                 
-                    qtyToTrade = 0
-                    
-                elif qtyToTrade == order.qty:
-
-                    tradedQty = qtyToTrade
-                    # hit bid or lift ask
-                    tree.removeOrderById(order.orderId)
-                    # Incoming done with
-                    qtyToTrade = 0
-                    
-                else:
-                    tradedQty = order.qty
-                    # hit bid or lift ask
-                    tree.removeOrderById(order.orderId)
-                    # continue processing volume at this price
-                    qtyToTrade -= tradedQty
-
-                transactionRecord = {'timestamp': book.getTimestamp(), 'price': order.price, 'qty': tradedQty}
+            elif qtyToTrade == order.qty:
+                tradedQty = qtyToTrade
+                # hit bid or lift ask
+                tree.removeOrderById(order.orderId)
+                # Incoming done with
+                qtyToTrade = 0
                 
-                if tree.side == 'bid':
-                    transactionRecord['party1'] = [order.traderId, 'bid', order.orderId]
-                    transactionRecord['party2'] = [self.traderId, 'ask', None]
-                else:
-                    transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
-                    transactionRecord['party2'] = [self.traderId, 'bid',None ]
-                trades.append(transactionRecord)
-        #print(trades)
+            else:
+                tradedQty = order.qty
+                # hit bid or lift ask
+                tree.removeOrderById(order.orderId)
+                # continue processing volume at this price
+                qtyToTrade -= tradedQty
+            transactionRecord = {'timestamp': book.getTimestamp(), 'price': order.price, 'qty': tradedQty}
+            
+            if tree.side == 'bid':
+                transactionRecord['party1'] = [order.traderId, 'bid', order.orderId]
+                transactionRecord['party2'] = [self.traderId, 'ask', None]
+            else:
+                transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
+                transactionRecord['party2'] = [self.traderId, 'bid',None ]
+            trades.append(transactionRecord)
+        #print(rades)
         return qtyToTrade, trades
 
  
