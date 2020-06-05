@@ -30,11 +30,11 @@ class TransactionViewset(
     def get_permissions (self):
         permission = []
         if self.action in ['list','retrieve'] : 
-            permision =  [AllowAny ,  IsAuthenticatedOrReadOnly ]
+            permision =  [AllowAny  ]
         elif self.action in[ 'create' , 'partial' , 'update']:
             permision = [LazyAuthenticated, ]
         
-        return [p() for p in permision]
+        return [p() for p in permission]
 
 
     def get_queryset(self) :
