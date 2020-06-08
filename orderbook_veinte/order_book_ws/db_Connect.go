@@ -14,7 +14,7 @@ var once sync.Once
 
 func GetRedisClient() *RedisClient {
 	once.Do(func() {
-		url, _ := redis.ParseURL("redisgo://redis:6379/6")
+		url, _ := redis.ParseURL("redis://redisgo:6379/6")
 		client := redis.NewClient(&redis.Options{
 			Addr:     url.Addr,
 			Password: url.Password,

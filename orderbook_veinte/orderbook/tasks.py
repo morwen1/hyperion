@@ -24,24 +24,29 @@ from orderbook_veinte.utils.manage_transaction import TransactionsManger
 
 
 
+
+
 #Process order
 @task(name="processingOrder" )
 def AsincronicOrderProces (order , side , price , qty ):
     del order['side']
+    
     ob = initializeTree(qty,price)
     if side == 'ask':
         orderobj = Ask(**order)
     elif side == 'bid':
         orderobj = Bid(**order)
+    
     trades , orderInbook = ob.processOrder(orderobj)
     if len(trades) > 0 :
-        Transaction.delay(trades)
+        Transaction(trades)
 
     return trades 
 
 
+
+
 #Transaction
-@task(name="processingTransaction" )
 def Transaction(transaction):
     #tru = transaction unit
     #trm = transaction manager
@@ -58,10 +63,17 @@ def Transaction(transaction):
 
 
 
+#processing  order in remote site 
 
 
-
-    
+def RemoteTransaction(typeOrder:str):
+    """
+    request in a remote host a 
+    """
+    if typeOrder == 'lock':
+        pass 
+    elif typeOrder == 'unlock':
+        pass 
 
 
 #Notifications

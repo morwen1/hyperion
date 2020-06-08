@@ -5,7 +5,7 @@ IPYTHONDIR=/app/.ipython
 # Redis
 # ------------------------------------------------------------------------------
 REDIS_URL=redis://redis:6379/0
-REDIS_URL_TREE=redis://redis:6379/6
+REDIS_URL_TREE=redis://redisgo:6379/6
 
 # Celery 
 
