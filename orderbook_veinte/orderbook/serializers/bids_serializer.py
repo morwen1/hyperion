@@ -15,17 +15,25 @@ from orderbook_veinte.utils.manage_transaction import  format_output_qty
 
 
 
+#Initialize Tree
+from orderbook_veinte.orderbook.tree import initializeTree
+
+
+
 class BidsSerializers(serializers.ModelSerializer):
     class Meta : 
         model = Orders
         fields = ('qty' , 'price')
 
+#
+#   def to_representation(self , instance):
+#       representation = super(BidsSerializers , self).to_representation(instance)
+#        representation['qty'] = format_output_qty(instance.qty , type_qty='btc')
+#       return representation        
 
-    def to_representation(self , instance):
-        representation = super(BidsSerializers , self).to_representation(instance)
-        representation['qty'] = format_output_qty(instance.qty , type_qty='btc')
-        return representation        
 
+
+ 
     def create(self , validated_data):
         
         status = OrderStatus.objects.get(status = 'open')

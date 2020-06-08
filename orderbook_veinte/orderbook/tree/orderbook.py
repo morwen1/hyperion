@@ -145,7 +145,8 @@ class Order():
         #print(rades)
         return qtyToTrade, trades
 
- 
+#TODO "verificar las ordenes en que no puedas comprar tu orden"
+
 class Bid(Order):
     def __init__(self, qty, price, traderId, timestamp=None, orderId=None):
         Order.__init__(self,  qty, price, traderId, timestamp, orderId)
@@ -253,10 +254,10 @@ class OrderBook():
     def processOrder(self, order):
         orderInBook = None
         if order.qty <= 0:
-            raise 'order.qty must be > 0 '
+            raise BaseException('order.qty must be > 0 ')
 
         if order.price < 0:
-            raise 'order.qty must be > 0'
+            raise BaseException('order.qty must be > 0')
 
         order.timestamp = self.getTimestamp()
 

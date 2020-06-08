@@ -16,4 +16,5 @@ CELERY_FLOWER_USER=debug
 CELERY_FLOWER_PASSWORD=debug
 
 #JWT
-SIG_KEY=_*2n)2f6w=z1saytcmi)2cu-@w!n46ilq72g%^2+6907kffp
+#SIG_KEY=_*2n)2f6w=z1saytcmi)2cu-@w!n46ilq72g%^2+6907kffp
+SIG_KEY=localSecret

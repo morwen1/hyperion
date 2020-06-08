@@ -60,7 +60,8 @@ services:
   redis:
     image: redis:5.0
 
-  
+  redisgo:
+    image: redis:5.0
 
   celeryworker:
     <<: *django

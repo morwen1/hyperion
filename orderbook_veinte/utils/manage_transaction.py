@@ -53,17 +53,17 @@ class TransactionsManger :
             buyer.status = status_orders.get(status='open')
             buyer.save()
 
-        if seller.close_qty == 0  :
+        if seller.close_qty <= 0  :
             transaction_type = 'partial'
             seller.status=status_orders.get(status = 'completed')
             seller.save()
 
-        if buyer.close_qty == 0 : 
+        if buyer.close_qty <= 0 : 
             transaction_type = 'partial'
             buyer.status = status_orders.get(status = 'completed')
             buyer.save()
 
-        if (seller.close_qty == 0) and ( buyer.close_qty == 0)  : 
+        if (seller.close_qty <= 0) and ( buyer.close_qty <= 0)  : 
             transaction_type = 'complete'
             buyer.status = status_orders.get(status = 'completed')
             seller.status=status_orders.get(status = 'completed')
@@ -87,7 +87,7 @@ class TransactionsManger :
 
 
     def get_number_of_transactions(self):
-        transactions = Transacctions.objects.count()
+        transactions = Transactions.objects.count()
         return transactions
     
     def get_number_partial_complete_transactions(self):
