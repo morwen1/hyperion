@@ -24,7 +24,7 @@ class Orders ( AbOrderbook):
     traderId = models.CharField(max_length = 255) 
     qty = models.IntegerField()
     price = models.FloatField()
-    close_qty = models.IntegerField(null=True)
+    close_qty = models.IntegerField(default=0)
     Bid = models.BooleanField(default=False)
     Ask = models.BooleanField(default=False)
     status = models.ForeignKey(

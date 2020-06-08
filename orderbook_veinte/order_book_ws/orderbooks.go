@@ -16,12 +16,14 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	WriteBufferPool: &pool,
+	Subprotocols:    []string{"binary"},
 }
 
 var message = make(chan Responses)
 var wsClient *websocket.Conn
 
 func OrderBook(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	vars := mux.Vars(r)
 	var cripto = []string{
 		"BTC",
@@ -45,7 +47,9 @@ func OrderBook(w http.ResponseWriter, r *http.Request) {
 	keys := client.GenaratorKeys(PRICE, QTY)
 
 	if err != nil {
-		log.Panic("bad request")
+		log.Println(err)
+		log.Panic("bad request ")
+
 	}
 
 	wsClient = ws

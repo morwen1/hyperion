@@ -54,8 +54,9 @@ class Order():
                     i['party1'] = book.getOrderById(temp_id ,side )
                     
                     if i['party1'] == {} :
-                        objprt = Orders.objects.filter(orderId = temp_id).last()
+                        #import pdb; pdb.set_trace()
 
+                        objprt = Orders.objects.filter(orderId = temp_id).last()
                         i['party1']['side'] = side 
                         i['party1']['qty']= objprt.qty
                         i['party1']['price']  =  objprt.price 

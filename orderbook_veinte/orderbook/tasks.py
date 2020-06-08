@@ -27,7 +27,7 @@ from orderbook_veinte.utils.manage_transaction import TransactionsManger
 
 
 #Process order
-@task(name="processingOrder" )
+#@task(name="processingOrder" )
 def AsincronicOrderProces (order , side , price , qty ):
     del order['side']
     

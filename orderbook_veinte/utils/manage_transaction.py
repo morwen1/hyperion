@@ -23,52 +23,91 @@ class TransactionsManger :
     def saving_transactions (self):
         status_orders = OrderStatus.objects.all()
         #verificacion de los lados de la transaccion
+        
         if self.side1['side'] == 'ask':
-            
+            #import pdb; pdb.set_trace()
+
             seller = Orders.objects.get( orderId = int(self.side1['orderId']))
-            seller.close_qty = int( seller.qty  -  self.qty)
             buyer =Orders.objects.get( orderId = int(self.side2['orderId']))
-            buyer.close_qty = int( buyer.qty  -  self.qty)
+            if buyer.close_qty  >  0  and seller.close_qty >  0 :
+                seller.close_qty = int(seller.close_qty - self.qty)
+                buyer.close_qty = int( buyer.close_qty - self.qty)
+                print("else 1 " ,self.qty,seller.close_qty , buyer.close_qty)
+
+            elif seller.close_qty == 0 :
+                seller.close_qty = int(seller.qty - self.qty)
+                print("if 1 " ,self.qty,seller.close_qty , buyer.close_qty)
+
+            elif buyer.close_qty == 0:
+                buyer.close_qty = int( seller.qty - self.qty)
+                print("if 2 " ,self.qty,seller.close_qty , buyer.close_qty)
+
+            
+
+
+            
+
+            buyer.save()
+            seller.save()
 
 
 
         elif self.side1['side'] == 'bid':
-            buyer = Orders.objects.get( orderId = int(self.side1['orderId']))
-            buyer.close_qty = int( buyer.qty  -  self.qty)
+            #import pdb; pdb.set_trace()
+
+            
+            seller = Orders.objects.get( orderId = int(self.side1['orderId']))
+            buyer =Orders.objects.get( orderId = int(self.side2['orderId']))
+            if buyer.close_qty  >  0  and seller.close_qty >  0 :
+                seller.close_qty = int(seller.close_qty - self.qty)
+                buyer.close_qty = int( buyer.close_qty - self.qty)
+                print("else 1 " ,self.qty,seller.close_qty , buyer.close_qty)
+
+            elif seller.close_qty == 0 :
+                seller.close_qty = int(seller.qty - self.qty)
+                print("if 1 " ,self.qty,seller.close_qty , buyer.close_qty)
+
+            elif buyer.close_qty == 0:
+                buyer.close_qty = int( seller.qty - self.qty)
+                print("if 2 " ,self.qty,seller.close_qty , buyer.close_qty)
 
             buyer.save()
-            seller =Orders.objects.get( orderId = int(self.side2['orderId']))
-            seller.close_qty = int( seller.qty  -  self.qty)
             seller.save()
 
         #  WARNING celery tiene problemas con orm aveces 
         #validacion de los tipos de transacciones y los estados de las ordenes
-        if seller.close_qty != 0 :
-            transaction_type = 'partial'
-            seller.status=status_orders.get(status = 'open')
-            seller.save()
-
-        if buyer.close_qty != 0 : 
-            transaction_type = 'partial'
-            buyer.status = status_orders.get(status='open')
-            buyer.save()
-
-        if seller.close_qty <= 0  :
-            transaction_type = 'partial'
-            seller.status=status_orders.get(status = 'completed')
-            seller.save()
-
-        if buyer.close_qty <= 0 : 
-            transaction_type = 'partial'
-            buyer.status = status_orders.get(status = 'completed')
-            buyer.save()
-
-        if (seller.close_qty <= 0) and ( buyer.close_qty <= 0)  : 
+        temp_status = False
+        if (seller.close_qty == 0) and ( buyer.close_qty == 0)  and (temp_status == False) : 
             transaction_type = 'complete'
             buyer.status = status_orders.get(status = 'completed')
             seller.status=status_orders.get(status = 'completed')
             buyer.save()
             seller.save()
+            temp_status = True
+            
+
+        if (seller.close_qty != 0)  and (temp_status == False) :
+            transaction_type = 'partial'
+            seller.status=status_orders.get(status = 'open')
+            seller.save()
+            temp_status =True
+
+        if (buyer.close_qty != 0) and (temp_status == False) : 
+            transaction_type = 'partial'
+            buyer.status = status_orders.get(status='open')
+            buyer.save()
+
+        if (seller.close_qty == 0) and (temp_status == False) :
+            transaction_type = 'partial'
+            seller.status=status_orders.get(status = 'completed')
+            seller.save()
+
+        if (buyer.close_qty == 0) and (temp_status == False) : 
+            transaction_type = 'partial'
+            buyer.status = status_orders.get(status = 'completed')
+            buyer.save()
+
+
         
         
 

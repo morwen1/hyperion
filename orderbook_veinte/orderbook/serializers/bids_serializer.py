@@ -45,11 +45,7 @@ class BidsSerializers(serializers.ModelSerializer):
 
         bid = Bid(**validated_data  )
         #se activa la tarea de procesar orden
-        AsincronicOrderProces.delay(
-            order=bid.__dict__ , side ='bid' ,
-            
-            qty= self.context['qty'],
-            price= self.context['price'])
+   
 
 
         existence_order =False#Orders.objects.filter(**validated_data , Bid=True).exists()
@@ -59,15 +55,19 @@ class BidsSerializers(serializers.ModelSerializer):
             Bid = True , 
             market_qty= self.context['qty'],
             market_price =self.context['price'],
-            Ask = False,
-            close_qty = validated_data['qty'],
-            **validated_data
-            )
+            **validated_data)
+            
+        order.save()
+
+        AsincronicOrderProces(
+            order=bid.__dict__ , 
+            side ='bid' ,
+            qty= self.context['qty'],
+            price= self.context['price'])
             #if order.orderId != bid.orderId:
             #    order.orderId = bid.orderId
 
-        order.save()
-       
+        
         return order   
 
 

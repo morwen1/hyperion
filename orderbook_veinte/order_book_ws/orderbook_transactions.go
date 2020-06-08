@@ -15,6 +15,7 @@ var upgradertr = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	WriteBufferPool: &pooltr,
+	Subprotocols:    []string{"binary"},
 }
 
 type trModel struct {
@@ -30,8 +31,8 @@ var messagetr = make(chan []trModel)
 var wsClientr *websocket.Conn
 
 func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
-
 	vars := mux.Vars(r)
+	upgradertr.CheckOrigin = func(r *http.Request) bool { return true }
 	var cripto = []string{
 		"BTC",
 		"LTC",
@@ -55,6 +56,7 @@ func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
 	client := PsqlClient()
 	wstr, err := upgradertr.Upgrade(w, r, nil)
 	if err != nil {
+		log.Println(err)
 		log.Panic("bad request")
 
 	}

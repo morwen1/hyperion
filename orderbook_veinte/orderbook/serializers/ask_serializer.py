@@ -32,9 +32,7 @@ class AsksSerializers(serializers.ModelSerializer):
         user = self.context['request'].user
         traderId = user.trader_id
         validated_data['traderId']=traderId
-        ask = Ask(**validated_data  )
-        AsincronicOrderProces.delay(order=ask.__dict__ , side ='ask', qty= self.context['qty'], price= self.context['price'] )
-        
+
 
         order = Orders.objects.create(
                 status = status,
@@ -42,11 +40,21 @@ class AsksSerializers(serializers.ModelSerializer):
                 market_qty= self.context['qty'],
                 market_price =self.context['price'],
                 Bid = False,
-                close_qty = validated_data['qty'],
                 **validated_data
             )
 
         order.save()
+
+        ask = Ask(**validated_data  )
+     
+        AsincronicOrderProces(
+            order=ask.__dict__ , 
+            side ='ask', 
+            qty= self.context['qty'], 
+            price= self.context['price'] )
+
+        #AsincronicOrderProces.delay(order=ask.__dict__ , side ='ask', qty= self.context['qty'], price= self.context['price'] )
+
        
         return order   
 
