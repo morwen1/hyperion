@@ -1,6 +1,7 @@
 #Rest framework
 from rest_framework.generics import mixins 
 from rest_framework.viewsets import GenericViewSet
+from rest_framework.response import Response
 #models 
 
 from orderbook_veinte.orderbook.models.Order import Orders
@@ -15,6 +16,8 @@ from orderbook_veinte.utils.permissions import LazyAuthenticated
 from rest_framework.permissions import AllowAny , IsAuthenticatedOrReadOnly
 
 
+from orderbook_veinte.orderbook.tasks import AsincronicOrderProces
+from orderbook_veinte.orderbook.tree import Ask
 
 class CreateAsks( 
     GenericViewSet,  
@@ -67,3 +70,5 @@ class CreateAsks(
             serializer = UpdateAskSerializer
     
         return serializer
+
+    

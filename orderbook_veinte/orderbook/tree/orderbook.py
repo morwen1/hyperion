@@ -10,7 +10,7 @@ from .OrderTree import OrderTree
 from django.db.models import  Q
 
 #models
-from orderbook_veinte.orderbook.models import Orders
+from orderbook_veinte.orderbook.models import Orders , OrderStatus
 
 
 #__all__ = ['OrderException', 'OrderQuantityError', 'OrderPriceError', 'Bid', 'Ask', 'Trade', 'OrderBook']
@@ -20,78 +20,71 @@ from orderbook_veinte.orderbook.models import Orders
 
 
 class Order():
-    def __init__(self, qty, price, traderId, timestamp, orderId):
+    def __init__(self, qty, price, traderId, hash_order, timestamp, orderId  ):
         self.qty = int(qty)
         self.price = int(price)
         self.traderId = traderId
         self.timestamp = timestamp
         self.orderId = orderId
+        self.hash_order = hash_order
     
    
 
-    def trasactions (self , tr ,newTrades, book , Order) :
+    def trasactions (self , tr ,newTrades, book , Order ) :
         if len(newTrades) != 0 :
+            status = OrderStatus.objects.get(status = 'completed')
             #armo la transaccion en un diccionario para almacenarlo en redis
             tr2 = {}
             temp_id = 0 
             side = ''
             for i in newTrades:
                 print("trades  " , i , "\n*3")
+                temp_id1 =i['party1'][0]
+                temp_id2 = i['party2'][0]
+                side1 = i['party1'][2]
+                side2 = i['party2'][2]
+                side1_user = i['party1'][1]
+                side2_user = i['party2'][1]
+                side1_hash = i['party1'][5]
+                side2_hash = i['party2'][5]
+                party1_red = book.getOrderById(temp_id1 ,side1 )
+                party2_red = book.getOrderById(temp_id1 ,side2 )
+                
+                print(i)
+                
+                
+                if party1_red == {} :
 
-                if None in i['party2'] or i['party2'] == {}:
+                    status_open = OrderStatus.objects.get(status ='open')
+                    sideprt = (side1=='ask')
+                    print(side1_hash)
+                    objprt = Orders.objects.filter(hash_order = side1_hash).first()
 
-                    i['party2'] = self.__dict__
-                    print("party2 testing",i['party2'])
-                    tr2 = i['party2']
-                    i['party2'].pop('orderId')
-                    id_order = Orders.objects.filter(
-                        Q(traderId=tr2['traderId']) & Q(price=tr2['price'])
-                        ).first().orderId
+                    i['party1'] = {}
+                    i['party1']['side'] = side 
+                    i['party1']['qty']= objprt.qty
+                    i['party1']['price']  =  objprt.price 
+                    i['party1']['traderId']  =objprt.traderId
+                    i['party1']['orderId']  =objprt.orderId 
+
+    
+         
+
+               
+                if party2_red == {}  :
+                    status_closed = OrderStatus.objects.get(status ='open')
+                    sideprt = (side2=='ask')
                     
-                    i['party2']['orderId'] = id_order
-                    temp_id =i['party1'][2]
-                    side = i['party1'][1]
-                    i['party1'] = book.getOrderById(temp_id ,side )
-                    
-                    if i['party1'] == {} :
-                        #import pdb; pdb.set_trace()
-
-                        objprt = Orders.objects.filter(orderId = temp_id).last()
-                        i['party1']['side'] = side 
-                        i['party1']['qty']= objprt.qty
-                        i['party1']['price']  =  objprt.price 
-                        i['party1']['traderId']  =objprt.traderId
-                        i['party1']['orderId']  =objprt.orderId 
-
-                    tr.append(i)
-                    
-
-                elif None in i['party1'] or i['party1'] == {}:
-
-                    print(i['party1'])
-                    i['party1'] = self.__dict__
-
-                    tr2 = i['party1']
-                    i['party1']['orderId'] =Orders.objects.filter(
-                        Q(traderId=tr2['traderId']) & Q(price=tr2['price'])
-                        ).first().orderId
-                    temp_id =i['party2'][2]
-                    side = i['party2'][1]
-                    i['party2'] = book.getOrderById(temp_id ,side )
-                    if i['party2'] == {}  :
-                        
-                        objprt = Orders.objects.filter(orderId = temp_id).last()
-                        
-                        i['party2']['side'] = side 
-                        i['party2']['qty']= objprt.qty
-                        i['party2']['price']  =  objprt.price 
-                        i['party2']['traderId']  =objprt.traderId
-                       # i['party2']['timestamp']  =objprt.timestamp
-                        i['party2']['orderId']  =objprt.orderId 
-
-                    tr.append(i)
-                    
-
+                    objprt = Orders.objects.filter(hash_order = side2_hash ).first()
+                    i['party2'] = {}
+                    i['party2']['side'] = side 
+                    i['party2']['qty']= objprt.qty
+                    i['party2']['price']  =  objprt.price 
+                    i['party2']['traderId']  =objprt.traderId
+                   # i['party2']['timestamp']  =objprt.timestamp
+                    i['party2']['orderId']  =objprt.orderId 
+          
+                tr.append(i)
             print("tr " , tr)
             if self.side == 'bid':
                 for trades in tr :
@@ -99,7 +92,6 @@ class Order():
             if self.side == 'ask':
                 for trades in tr :
                     book.asks.saveTransaction(trades)
-        
         return tr
 
     def processPriceLevel(self, book, tree, orderlist, qtyToTrade , priceToTrade):
@@ -110,6 +102,7 @@ class Order():
         trades = []
         
         for order in orderlist:
+            print('order' , order.__dict__)
             if qtyToTrade <= 0:
                 break
             if qtyToTrade < order.qty:
@@ -135,13 +128,13 @@ class Order():
                 # continue processing volume at this price
                 qtyToTrade -= tradedQty
             transactionRecord = {'timestamp': book.getTimestamp(), 'price': order.price, 'qty': tradedQty}
-            
+            print(order.orderId , self.orderId)
             if tree.side == 'bid':
-                transactionRecord['party1'] = [order.traderId, 'bid', order.orderId]
-                transactionRecord['party2'] = [self.traderId, 'ask', None]
+                transactionRecord['party1'] = [order.orderId , order.traderId, 'bid',  order.qty , order.timestamp , order.hash_order]
+                transactionRecord['party2'] = [self.orderId , self.traderId, 'ask',  self.qty , self.timestamp , self.hash_order]
             else:
-                transactionRecord['party1'] = [order.traderId, 'ask', order.orderId]
-                transactionRecord['party2'] = [self.traderId, 'bid',None ]
+                transactionRecord['party1'] = [order.orderId , order.traderId, 'bid',  order.qty , order.timestamp  , order.hash_order]
+                transactionRecord['party2'] = [self.orderId , self.traderId, 'ask',  self.qty , self.timestamp , self.hash_order]
             trades.append(transactionRecord)
         #print(rades)
         return qtyToTrade, trades
@@ -149,9 +142,10 @@ class Order():
 #TODO "verificar las ordenes en que no puedas comprar tu orden"
 
 class Bid(Order):
-    def __init__(self, qty, price, traderId, timestamp=None, orderId=None):
-        Order.__init__(self,  qty, price, traderId, timestamp, orderId)
+    def __init__(self, qty, price, traderId, hash_order , timestamp=None, orderId=None):
+        Order.__init__(self,  qty, price, traderId, hash_order, timestamp, orderId)
         self.side = 'bid'
+
 
     def limitOrder(self, book, bids, asks):
         trades = []
@@ -160,13 +154,14 @@ class Bid(Order):
         qtyToTrade = self.qty
 
         while (asks and self.price >= asks.minPrice() and qtyToTrade > 0):
-            bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId']) for x in asks.minPriceList()]
+            bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'],x['hash_order'] ,x['timestamp'], x['orderId'] ) for x in asks.minPriceList()]
             
             qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade , self.price)
-                                    
-            trades = self.trasactions(trades , newTrades , book  ,Order)
+            
+                                   
+            trades = self.trasactions(trades , newTrades , book  ,Order )
 
-
+            
         # si la orden no queda en 0 inserta la orden en libro de ordenes 
         #   esperando otra orden
 
@@ -182,27 +177,30 @@ class Bid(Order):
         trades = []
         qtyToTrade = self.qty
         while qtyToTrade > 0 and self.asks:
-            bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId']) for x in asks.minPriceList()]
+            bestPriceAsks = [Ask(x['qty'], x['price'], x['traderId'], x['hash_order'],x['timestamp'], x['orderId'] ) for x in asks.minPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book, asks, bestPriceAsks, qtyToTrade , self.price)
             trades += newTrades
         return trades
 
 
 class Ask(Order):
-    def __init__(self, qty, price, traderId, timestamp=None, orderId=None):
-        Order.__init__(self, qty, price, traderId, timestamp, orderId)
+    def __init__(self, qty, price, traderId , hash_order , timestamp=None, orderId=None ):
+        Order.__init__(self, qty, price, traderId, hash_order , timestamp, orderId )
         self.side = 'ask'
+        
 
     def limitOrder(self, book, bids, asks):
         trades = []
         orderInBook = None
         qtyToTrade = self.qty
         while (bids and self.price <= bids.maxPrice() and qtyToTrade > 0):
-            bestPriceBids = [Bid(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'])
+            bestPriceBids = [Bid(x['qty'], x['price'], x['traderId'], x['hash_order'] , x['timestamp'], x['orderId'] )
                              for x in bids.maxPriceList()]
+            print('prices',bestPriceBids[0].__dict__)
+
             qtyToTrade, newTrades = self.processPriceLevel(book,  bids, bestPriceBids, qtyToTrade , self.price)
             
-            trades = self.trasactions(trades , newTrades , book , Order)
+            trades = self.trasactions(trades , newTrades , book , Order )
            
         # si la orden no queda en 0 inserta la orden en libro de ordenes 
         #   esperando otra orden
@@ -220,7 +218,7 @@ class Ask(Order):
         trades = []
         qtyToTrade = self.qty
         while qtyToTrade > 0 and self.bids:
-            bestPriceBids = [Bid(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'])
+            bestPriceBids = [Bid(x['qty'], x['price'], x['traderId'], x['timestamp'], x['orderId'] )
                              for x in bids.maxPriceList()]
             qtyToTrade, newTrades = self.processPriceLevel(book, bids, bestPriceBids, qtyToTrade, self.price)
             trades += newTrades
@@ -260,7 +258,7 @@ class OrderBook():
         if order.price < 0:
             raise BaseException('order.qty must be > 0')
 
-        order.timestamp = self.getTimestamp()
+        #order.timestamp = self.getTimestamp()
 
         trades, orderInBook = order.limitOrder(self, self.bids, self.asks)
 

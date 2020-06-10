@@ -20,28 +20,37 @@ from orderbook_veinte.orderbook.models import Transactions
 
 #transaction 
 
-from orderbook_veinte.utils.manage_transaction import TransactionsManger
-
+from orderbook_veinte.utils.manage_transaction import TransactionsManger 
 
 
 
 
 #Process order
-#@task(name="processingOrder" )
-def AsincronicOrderProces (order , side , price , qty ):
+@task(name="processingOrder" )
+def AsincronicOrderProces (order , side , price , qty  ):
+
+    order_rel_exists = False 
+    task_hash = order['hash_order']
     del order['side']
+    while order_rel_exists == False :
+        
+        orders= Orders.objects.filter(hash_order = task_hash)
+        if len(order) > 0 :
+            order_rel_exists = True
+        else : 
+            time.sleep(0.2)
+
     
     ob = initializeTree(qty,price)
     if side == 'ask':
-        orderobj = Ask(**order)
+        orderobj = Ask(**order )
     elif side == 'bid':
-        orderobj = Bid(**order)
+        orderobj = Bid(**order )
     
     trades , orderInbook = ob.processOrder(orderobj)
     if len(trades) > 0 :
-        Transaction(trades)
-
-    return trades 
+        buyer , seller = Transaction(trades)
+        #import pdb; pdb.set_trace()
 
 
 
@@ -59,7 +68,7 @@ def Transaction(transaction):
         time
         trm = TransactionsManger(side1 , side2 ,qty , price )
         
-        trm.saving_transactions()
+        return trm.saving_transactions()
 
 
 

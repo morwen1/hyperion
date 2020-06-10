@@ -54,7 +54,7 @@ class CreateBids(
             'qty': self.qty_orderbook,
             'price':self.price_orderbook
         }
-
+ 
 
 
     def get_serializer_class(self):
@@ -64,3 +64,4 @@ class CreateBids(
         elif self.action == 'update' : 
             serializer = UpdateBidSerializer
         return serializer
+

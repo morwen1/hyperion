@@ -27,6 +27,7 @@ class Orders ( AbOrderbook):
     close_qty = models.IntegerField(default=0)
     Bid = models.BooleanField(default=False)
     Ask = models.BooleanField(default=False)
+    hash_order = models.CharField(max_length=255 , blank=True)
     status = models.ForeignKey(
         to=OrderStatus,
         on_delete= models.SET_NULL ,

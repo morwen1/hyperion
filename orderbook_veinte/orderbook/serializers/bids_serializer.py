@@ -13,6 +13,7 @@ from orderbook_veinte.orderbook.tree import Bid
 from orderbook_veinte.orderbook.tasks import AsincronicOrderProces
 from orderbook_veinte.utils.manage_transaction import  format_output_qty
 
+from orderbook_veinte.utils.hashing import  generatehash
 
 
 #Initialize Tree
@@ -21,9 +22,7 @@ from orderbook_veinte.orderbook.tree import initializeTree
 
 
 class BidsSerializers(serializers.ModelSerializer):
-    class Meta : 
-        model = Orders
-        fields = ('qty' , 'price')
+
 
 #
 #   def to_representation(self , instance):
@@ -35,42 +34,67 @@ class BidsSerializers(serializers.ModelSerializer):
 
  
     def create(self , validated_data):
+        status_orders = OrderStatus.objects.all()
+        status = status_orders.get(status = 'open')
         
-        status = OrderStatus.objects.get(status = 'open')
 
         user = self.context['request'].user
         traderId = user.trader_id
         validated_data['traderId']=traderId
 
 
-        bid = Bid(**validated_data  )
         #se activa la tarea de procesar orden
    
 
 
-        existence_order =False#Orders.objects.filter(**validated_data , Bid=True).exists()
-
+        existence_order =False 
+        #import pdb; pdb.set_trace()
         order = Orders.objects.create(
-            status =status,
+            status = status,
             Bid = True , 
             market_qty= self.context['qty'],
             market_price =self.context['price'],
             **validated_data)
-            
-        order.save()
 
-        AsincronicOrderProces(
+
+        return order
+    def save(self, **kwargs ):
+
+        validated_data = dict(
+            list(self.validated_data.items()) +
+            list(kwargs.items())
+        )
+
+        self.instance = self.create(validated_data) 
+        order = self.instance
+        order.close_qty = order.qty
+        
+
+        hash_order = generatehash([order.traderId , order.created_at.timestamp()])
+        order.hash_order = hash_order
+        validated_data['hash_order'] = hash_order
+        bid = Bid(**validated_data  )
+
+        
+        
+        order.save()
+        
+        AsincronicOrderProces.delay(
             order=bid.__dict__ , 
             side ='bid' ,
             qty= self.context['qty'],
-            price= self.context['price'])
-            #if order.orderId != bid.orderId:
-            #    order.orderId = bid.orderId
+            price= self.context['price'],
+            )
 
+        return order  
+
+
+
+    class Meta : 
+        model = Orders
+        fields = ('qty' , 'price')
+    
         
-        return order   
-
-
 class UpdateBidSerializer(serializers.ModelSerializer):
     class Meta : 
         model = Orders
