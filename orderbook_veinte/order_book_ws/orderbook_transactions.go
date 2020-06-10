@@ -19,10 +19,10 @@ var upgradertr = websocket.Upgrader{
 }
 
 type trModel struct {
-	Id              int     `json:id`
-	Qty             int     `json:qty`
-	Price           float64 `json:price`
-	TypeTransaction string  `json:type_transaction`
+	Id              int     `json:"id"`
+	Qty             int     `json:"qty"`
+	Price           float64 `json:"price"`
+	TypeTransaction string  `json:"type_transaction"`
 }
 
 var items []trModel
