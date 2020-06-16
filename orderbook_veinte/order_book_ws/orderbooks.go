@@ -55,12 +55,11 @@ func OrderBook(w http.ResponseWriter, r *http.Request) {
 	wsClient = ws
 	if QTY != PRICE {
 		if (InBool(cripto, QTY) || InBool(fiat, QTY)) && (InBool(cripto, PRICE) || InBool(fiat, PRICE)) {
-			counter := len(client.Keys("quote*").Val())
-			counter_transactions := ""
+			counter := 0               //len(client.Keys("quote*").Val())
+			counter_transactions := "" //client.Get(keys["COUNTER_TRANSACTION"]).Val()
 
 			for {
 				var msg Responses
-				time.Sleep(100 * time.Millisecond) // descanso de las peticiones
 
 				c := len(client.Keys("quote*").Val())
 				c_tr := client.Get(keys["COUNTER_TRANSACTION"]).Val()
@@ -82,6 +81,8 @@ func OrderBook(w http.ResponseWriter, r *http.Request) {
 					counter_transactions = client.Get(keys["COUNTER_TRANSACTION"]).Val()
 
 					log.Println("change message...  ", counter)
+					time.Sleep(10 * time.Millisecond) // descanso de las peticiones
+
 				}
 
 			}
