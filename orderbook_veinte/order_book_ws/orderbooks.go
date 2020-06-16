@@ -57,6 +57,7 @@ func OrderBook(w http.ResponseWriter, r *http.Request) {
 		if (InBool(cripto, QTY) || InBool(fiat, QTY)) && (InBool(cripto, PRICE) || InBool(fiat, PRICE)) {
 			counter := len(client.Keys("quote*").Val())
 			counter_transactions := ""
+
 			for {
 				var msg Responses
 				time.Sleep(100 * time.Millisecond) // descanso de las peticiones
@@ -69,6 +70,7 @@ func OrderBook(w http.ResponseWriter, r *http.Request) {
 					asks := client.GetQuotes(true, 100, "ask", keys)
 					msg.Asks = asks
 					msg.Bids = bids
+
 					msg.MinPriceAsk = client.GetPrices("asc", "ask", keys)
 					msg.MinPriceBid = client.GetPrices("asc", "bid", keys)
 					msg.MaxPriceAsk = client.GetPrices("desc", "ask", keys)

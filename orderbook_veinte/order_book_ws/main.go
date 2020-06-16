@@ -6,7 +6,9 @@ import (
 )
 
 func main() {
+
 	r := Router()
+
 	server := Server(r, "0.0.0.0:8001")
 	go server.ListenAndServe()
 	log.Println("running server....")

@@ -1,9 +1,9 @@
 package main
 
 type Order struct {
-	OrderId   string `json:"orderId"`
-	Qty       string `json:"qty"`
-	TraderId  string `json:"traderId"`
+	//OrderId   string `json:"orderId"`
+	Qty string `json:"qty"`
+	//TraderId  string `json:"traderId"`
 	Price     string `json:"price"`
 	Timestamp string `json:"timestamp"`
 	Side      string `json:"side"`

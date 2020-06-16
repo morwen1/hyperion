@@ -7,4 +7,4 @@
 #pwd
 go build .
 #go run .
-./app
+./order_book_ws

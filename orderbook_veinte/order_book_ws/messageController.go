@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -17,8 +18,10 @@ import (
 func (red *RedisClient) GetQuotes(reverse bool, depth int, side string, keys map[string]string) []Order {
 	var orders []Order
 	var order Order
+	var orderTemp Order
 	price_key := keys["KEY_PRICE_TREE"] + side
 	order_price_key := side + keys["KEY_TEMPLATE_PRICE_QUOTES"]
+
 	prices, err := red.ZRevRange(price_key, 0, -1).Result()
 
 	if err != nil {
@@ -38,8 +41,17 @@ func (red *RedisClient) GetQuotes(reverse bool, depth int, side string, keys map
 			if err != nil {
 				log.Println(item, "err into decoding", err)
 			}
-			orders = append(orders, order)
+			orderTemp.Price = order.Price
+			qty2, _ := strconv.Atoi(order.Qty)
+			qty1, _ := strconv.Atoi(orderTemp.Qty)
+			realQty := strconv.Itoa(qty1 + qty2)
+
+			orderTemp.Qty = realQty
+			orderTemp.Side = order.Side
+			orderTemp.Timestamp = order.Timestamp
+
 		}
+		orders = append(orders, orderTemp)
 
 	}
 	return orders
