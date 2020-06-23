@@ -11,6 +11,7 @@ import (
 )
 
 var pooltr sync.Pool
+
 var upgradertr = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -62,6 +63,7 @@ func OrderbookTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	wsClientr = wstr
 	c_tr := ""
+	items = []trModel{}
 	if QTY != PRICE {
 
 		if (InBool(cripto, QTY) || InBool(fiat, QTY)) && (InBool(cripto, PRICE) || InBool(fiat, PRICE)) {
