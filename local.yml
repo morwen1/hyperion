@@ -51,8 +51,7 @@ services:
     env_file:
       - ./.envs/.local/.postgres
 
-    ports :
-      - 5432:5432
+   
 
 
 
