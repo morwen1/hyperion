@@ -10,6 +10,7 @@ services:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
     image: orderbook_veinte_local_django
+    restart : always
     depends_on:
       - postgres
       - redis
@@ -29,6 +30,7 @@ services:
       context: . 
       dockerfile: ./compose/local/golang/Dockerfile
     image: orderbook_veinte_local_golang
+    restart : always
     depends_on:
       - django
       - redis 
@@ -45,6 +47,7 @@ services:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
     image: orderbook_veinte_production_postgres
+    restart : always
     volumes:
       - local_postgres_data:/var/lib/postgresql/data
       - local_postgres_data_backups:/backups
@@ -65,6 +68,7 @@ services:
   celeryworker:
     <<: *django
     image: orderbook_veinte_local_celeryworker
+    restart: always
     depends_on:
       - django
       - redis
@@ -75,6 +79,7 @@ services:
   celerybeat:
     <<: *django
     image: orderbook_veinte_local_celerybeat
+    restart: always
     depends_on:
       - django
       - redis
@@ -86,6 +91,7 @@ services:
   flower:
     <<: *django
     image: orderbook_veinte_local_flower
+    restart: always
     ports:
       - "5557:5555"
     command: /start-flower

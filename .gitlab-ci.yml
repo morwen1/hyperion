@@ -1,8 +1,9 @@
-
-
-stages : 
-  - make_containers
-  - run
+stages:
+  - envs
+  - test
+  - migrations
+  - deploy
+  - stack
 
 
 variables:
@@ -10,30 +11,107 @@ variables:
   DOCKER_DRIVER: overlay2
 
 
-before_script : 
-  - sudo apt-get update -y && sudo apt-get upgrade -y 
-  - sudo apt-get install docker -y  && sudo apt-get install docker-compose -y   
-
-
-
-making_containers:
-  stage: make_containers
-  script :
-    - sudo docker system prune -f
-    - sudo docker-compose -f local.yml build --no-cache
-    - sudo docker-compose -f local.yml up -d 
-    - sudo docker-compose -f local.yml logs  
-  
+check_depends:
   only:
     - develop
+  stage: test
+  script:
+    - sudo safety check -r requirements.txt
+    - echo "Success ! "
+  tags:
+    - orderbookstg
+    
+  allow_failure: true
+
+
+run_tests : 
+  only: 
+    - develop
+  stage : test 
+  script : 
+    - sudo docker-compose -f staging.yml run --rm django python3 manage.py check
+
   tags :
     - orderbookstg
 
-run_containers : 
-  stage : run 
-  script : 
-    - docker-compose -f production.yml up -d 
+
+
+migrations:
+  only:
+    - develop
+  stage: migrations
+  script:
+    - sudo docker-compose -f staging.yml run --rm django python3 manage.py makemigrations
+    - sudo docker-compose -f staging.yml run --rm django python3 manage.py migrate
+  tags:
+    - orderbookstg
+
+
+making_containers:
+  only:
+    - develop
+
+  stage: deploy
+
+  script:
+    - sudo docker-compose -f staging.yml down 
+    - sudo docker-compose -f staging.yml build 
+    - sudo docker-compose -f staging.yml up -d
+    - sudo docker-compose -f staging.yml logs postgres
+    - sudo docker-compose -f staging.yml logs django
+    - sudo docker-compose -f staging.yml logs celeryworker
+    - sudo docker-compose -f staging.yml run --rm postgres backup
+
+  tags:
+    - orderbookstg
+
+
+create_env:
   only:
     - master
+  stage: envs
+  script:
+    - echo "POSTGRES_PASSWORD="$POSTGRES_PASSWORD >> .envs/.production/.postgres
+    - echo "POSTGRES_USER="$POSTGRES_USER >> .envs/.production/.postgres
+    - echo "POSTGRES_PORT="$POSTGRES_PORT >> .envs/.production/.postgres
+    - echo "POSTGRES_HOST="$POSTGRES_HOST >> .envs/.production/.postgres
+    - echo "Success! C:"
+    #- sh migrate.sh
+  
+  tags :
+    - orderbookmaster
+      
+
+
+run_tests_prod : 
+  only: 
+    - master
+  stage : test 
+  script : 
+    - sudo docker-compose -f production.yml run --rm django python3 manage.py check
+  
+  tags :
+    - orderbookmaster
+    
+
+
+
+making_prod: 
+  only : 
+    - master
+  
+  stage: deploy
+  script:
+    -  sudo docker-compose -f production.yml down 
+    -  sudo docker-compose -f production.yml build 
+    -  sudo docker-compose -f production.yml up -d
+    -  sudo docker-compose -f production.yml logs postgres
+    -  sudo docker-compose -f production.yml logs django
+    -  sudo docker-compose -f production.yml logs celeryworker
+    -  sudo docker-compose -f production.yml run --rm postgres backup
+   
+  tags:
+    - orderbookmaster
+
 
     
